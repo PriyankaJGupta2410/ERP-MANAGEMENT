@@ -1,11 +1,13 @@
 CREATE TABLE admission_master (
-    _id VARCHAR(36) PRIMARY KEY,
+    _id CHAR(36) PRIMARY KEY,
+
+    -- Personal Info
     first_name VARCHAR(100),
     middle_name VARCHAR(100),
     last_name VARCHAR(100),
     email VARCHAR(150),
-    mobile_number VARCHAR(20),
-    gender VARCHAR(10),
+    mobile_number VARCHAR(15),
+    gender VARCHAR(20),
     religion VARCHAR(50),
     dob DATE,
     birth_place VARCHAR(100),
@@ -17,41 +19,57 @@ CREATE TABLE admission_master (
     mother_tongue VARCHAR(50),
     locality VARCHAR(100),
     blood_group VARCHAR(10),
-    guardian_mobile VARCHAR(20),
-    mother_mobile VARCHAR(20),
-    earning_parent_income VARCHAR(100),
+    guardian_mobile VARCHAR(15),
+    mother_mobile VARCHAR(15),
+    earning_parent_income VARCHAR(50),
     earning_parent_pan VARCHAR(20),
+
+    -- Admission Info
     admission_category VARCHAR(50),
     caste_category VARCHAR(50),
     caste_subcaste VARCHAR(50),
     caste_validity_no VARCHAR(50),
     eligibility_no VARCHAR(50),
     general_reg_no VARCHAR(50),
+
+    -- Banking Info
     bank_name VARCHAR(100),
     branch VARCHAR(100),
     account_no VARCHAR(30),
     ifsc_code VARCHAR(20),
     micr_code VARCHAR(20),
+
+    -- Academic Info
     last_institute_name VARCHAR(150),
     upisc_code VARCHAR(50),
     migration_cert_no VARCHAR(50),
     lc_tc_no VARCHAR(50),
+
+    -- Qualifying Exam Info
     exam VARCHAR(100),
     exam_body VARCHAR(100),
-    passing_month_year VARCHAR(50),
-    obtained_marks VARCHAR(20),
-    out_of_marks VARCHAR(20),
-    percentage VARCHAR(10),
+    passing_month_year VARCHAR(20),
+    obtained_marks DECIMAL(6,2),
+    out_of_marks DECIMAL(6,2),
+    percentage DECIMAL(5,2),
+
+    -- File Info
     photo_name VARCHAR(255),
     photo_data LONGBLOB,
     signature_name VARCHAR(255),
     signature_data LONGBLOB,
-    extra_docs TEXT,
+    extra_docs JSON,
+
+    -- Address Info
     current_address JSON,
     permanent_address JSON,
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+
+    -- Audit Fields
+    created_by VARCHAR(100),
+    created_date DATETIME,
+    modified_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 
 CREATE TABLE user_master (
@@ -65,17 +83,6 @@ CREATE TABLE user_master (
     login_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-
--- CREATE TABLE usermaster (
---     _id CHAR(36) PRIMARY KEY,
---     username VARCHAR(100) NOT NULL,
---     email VARCHAR(100) NOT NULL UNIQUE,
---     password TEXT NOT NULL,
---     role VARCHAR(50) NOT NULL,
---     contact VARCHAR(15) NOT NULL,
---     created_date DATETIME NOT NULL
--- );
 
 CREATE TABLE parent_master (
 	_id CHAR(36) PRIMARY KEY,

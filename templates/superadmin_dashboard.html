@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Superadmin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    #school-container {
+      max-width: 900px;
+      margin: 20px auto;
+      background-color: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .school-detail {
+      margin-bottom: 15px;
+    }
+
+    .school-detail strong {
+      display: inline-block;
+      width: 140px;
+    }
+
+    #addSupervisorBtn {
+      display: block;
+      margin: 30px auto 0;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #addSupervisorBtn:hover {
+      background-color: #45a049;
+    }
+
+    #response {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Superadmin Dashboard</h2>
+
+  <div id="school-container">
+    <div class="school-detail"><strong>About Us:</strong> <span id="about_us"></span></div>
+    <div class="school-detail"><strong>Infrastructure:</strong> <span id="infrastructure"></span></div>
+    <div class="school-detail"><strong>Latest News:</strong> <span id="latest_news"></span></div>
+    <div class="school-detail"><strong>Gallery:</strong> <span id="gallery"></span></div>
+    <div class="school-detail"><strong>Contact Us:</strong> <span id="contact_us"></span></div>
+    <div class="school-detail"><strong>Created Date:</strong> <span id="created_date"></span></div>
+  </div>
+
+  <button id="addSupervisorBtn" onclick="location.href='/addSupervisor'">Add Supervisor</button>
+
+  <p id="response"></p>
+
+  <script>
+    async function fetchSchoolDetails() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+        document.getElementById("response").innerText = "Authentication token missing.";
+        return;
+        }
+        const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': token
+          }
+
+        });
+
+        const result = await res.json();
+
+        if (result.status === "success" && result.res_data.length > 0) {
+          const school = result.res_data[0];
+
+          document.getElementById("about_us").innerText = school.about_us;
+          document.getElementById("infrastructure").innerText = school.infrastructure;
+          document.getElementById("latest_news").innerText = school.latest_news;
+          document.getElementById("gallery").innerText = school.gallery;
+          document.getElementById("contact_us").innerText = school.contact_us;
+          document.getElementById("created_date").innerText = school.created_date;
+        } else {
+          document.getElementById("response").innerText = result.message || "No school data found.";
+        }
+      } catch (error) {
+        document.getElementById("response").innerText = "Error: " + error.message;
+      }
+    }
+
+    // Call on load
+    fetchSchoolDetails();
+  </script>
+</body>
+</html>

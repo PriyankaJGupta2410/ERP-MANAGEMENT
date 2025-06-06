@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register Superadmin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    h2 {
+      color: #333;
+      text-align: center;
+    }
+    form {
+      max-width: 400px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    .button-container {
+      margin-top: 25px;
+      text-align: center;
+    }
+    input[type="submit"] {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #response {
+      margin-top: 20px;
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h2>Register Superadmin</h2>
+  <form id="superadminForm">
+    <label>Username:</label>
+    <input type="text" name="username" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" required>
+
+    <label>Password:</label>
+    <input type="password" name="password" required>
+
+    <label>Contact:</label>
+    <input type="text" name="contact" pattern="[0-9]{10}" title="Enter 10 digit mobile number" required>
+
+    <!-- Hidden Role -->
+    <input type="hidden" name="role" value="Superadmin">
+
+    <div class="button-container">
+      <input type="submit" value="Register">
+    </div>
+  </form>
+
+  <p id="response"></p>
+
+  <script>
+    document.getElementById('superadminForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/auth/RegisterSuperadmin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.status === "success") {
+          localStorage.setItem('superadmin_id', result.res_data._id);
+          alert(result.message);
+          window.location.href = "/registerSchool"; // make sure this file path is correct
+        } else {
+          document.getElementById('response').innerText = result.message || "Registration failed";
+        }
+      } catch (error) {
+        document.getElementById('response').innerText = "Error: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add School Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    textarea, input[type="submit"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+    #response {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h2 style="text-align:center;">Add School Details</h2>
+
+  <form id="schoolForm">
+    <label>About Us:</label>
+    <textarea name="about" required></textarea>
+
+    <label>Infrastructure:</label>
+    <textarea name="infrastructure" required></textarea>
+
+    <label>Latest News:</label>
+    <textarea name="news" required></textarea>
+
+    <label>Gallery:</label>
+    <textarea name="gallery" required></textarea>
+
+    <label>Contact Us:</label>
+    <textarea name="contact" required></textarea>
+
+    <input type="submit" value="Register School">
+  </form>
+
+  <p id="response"></p>
+
+  <script>
+    document.getElementById('schoolForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const superadmin_id = localStorage.getItem("superadmin_id");
+      if (!superadmin_id) {
+        document.getElementById("response").innerText = "Superadmin ID not found. Please register the superadmin first.";
+        return;
+      }
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.superadmin_id = superadmin_id;
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/auth/RegisterSchool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+        document.getElementById('response').innerText = result.message;
+
+        if (res.ok && result.status === "success") {
+          form.reset();
+          // Optionally redirect or display more UI
+          // window.location.href = "/dashboard.html";
+        }
+      } catch (error) {
+        document.getElementById('response').innerText = "Error: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

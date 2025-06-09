@@ -167,7 +167,9 @@ def RegisterSuperadmin():
         profilepic_file = request.files.get("profilepic")
 
         if not all([username, email, role, contact, password]):
-            return jsonify({"status": "fail", "code": 400, "message": "All fields are required", "res_data": {}})
+            message = "All Fields are required"
+            code = 400
+            return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
 
         hashed_password = generate_password_hash(password)
         superadmin_id = str(uuid.uuid4())
@@ -192,17 +194,12 @@ def RegisterSuperadmin():
                 "email": email,
                 "role": role,
                 "contact": contact,
-                "created_date": created_date,
-                "profile_image" : profilepic_data
+                "created_date": created_date
             }
         })
     except Exception as ex:
-        return jsonify({
-            "status": "fail",
-            "code": 500,
-            "message": f"RegisterSuperadmin Error: {str(ex)}",
-            "res_data": {}
-        })
+        message = f"RegisterSuperadmin : {ex}"
+    return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
 
 @auth_bp.route('/RegisterSchool', methods=['POST'])
 def RegisterSchool():

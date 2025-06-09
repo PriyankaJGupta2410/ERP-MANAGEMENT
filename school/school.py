@@ -5,6 +5,7 @@ from connector import db,conn
 from functools import wraps
 from decorator import authentication
 import uuid
+import base64
 
 load_dotenv()
 school_bp = Blueprint('school',__name__)
@@ -17,42 +18,53 @@ def GETschooldetails(current_user_id=None):
     message = ""
     status = "fail"
     code = 500
-    res_data = []
+    res_data = {}
 
     try:
-        db.execute("SELECT 1 FROM user_master WHERE _id = %s", (current_user_id,))
-        user_exists = db.fetchone()
+        db.execute("SELECT school_id FROM user_master WHERE _id = %s", (current_user_id,))
+        user_row = db.fetchone()
 
-        if user_exists:
-            db.execute("SELECT * FROM school_master WHERE superadmin_id = %s", (current_user_id,))
-            rows = db.fetchall()
+        if user_row and user_row.get("school_id"):
+            school_id = user_row.get("school_id")
+            
+            db.execute("SELECT * FROM school_master WHERE _id = %s", (school_id,))
+            school = db.fetchone()
 
-            if rows:
-                for row in rows:
-                    school = {
-                        "_id": row[0],
-                        "about_us": row[1],
-                        "infrastructure": row[2],
-                        "latest_news": row[3],
-                        "gallery": row[4],
-                        "contact_us": row[5],
-                        "created_date": str(row[6]),
-                        "superadmin_id": row[7]
-                    }
-                    res_data.append(school)
+            if school:
+                gallery_data = school.get("gallery")
+                if isinstance(gallery_data, bytes):
+                    # Encode bytes to base64 string
+                    gallery_data = base64.b64encode(gallery_data).decode('utf-8')
 
+                # Optional: try parsing gallery as JSON if expected
+                try:
+                    gallery_data = json.loads(gallery_data)
+                except Exception:
+                    # If not JSON, keep as string
+                    pass
+                res_data = {
+                    "_id": school.get("_id"),
+                    "about_us": school.get("about_us"),
+                    "infrastructure": school.get("infrastructure"),
+                    "latest_news": school.get("latest_news"),
+                    "gallery": gallery_data,
+                    "contact_us": school.get("contact_us"),
+                    "created_date": str(school.get("created_date")),
+                    "superadmin_id": school.get("superadmin_id")
+                }
                 message = "School details fetched successfully."
                 status = "success"
                 code = 200
             else:
-                message = "No school records found for this user."
+                message = f"No school found for school_id: {school_id}"
                 code = 404
         else:
-            message = "User not found."
+            message = "User not found or school_id not assigned."
             code = 403
 
     except Exception as ex:
-        message = f"GETschooldetails: {str(ex)}"
+        message = f"GETschooldetails error: {str(ex)}"
+        code = 500
 
     return jsonify({
         "status": status,
@@ -60,4 +72,5 @@ def GETschooldetails(current_user_id=None):
         "message": message,
         "res_data": res_data
     })
+
 

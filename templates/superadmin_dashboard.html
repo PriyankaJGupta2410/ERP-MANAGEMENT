@@ -1,52 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Superadmin Dashboard</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      background-color: #f9f9f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f2f5;
     }
 
     h2 {
       text-align: center;
-      color: #333;
+      color: #2c3e50;
+      margin-top: 30px;
     }
 
     #school-container {
       max-width: 900px;
-      margin: 20px auto;
-      background-color: white;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin: 30px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .school-detail {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      font-size: 16px;
     }
 
     .school-detail strong {
       display: inline-block;
-      width: 140px;
+      width: 160px;
+      color: #333;
     }
 
     #addSupervisorBtn {
       display: block;
-      margin: 30px auto 0;
-      padding: 12px 24px;
-      background-color: #4CAF50;
+      margin: 40px auto 20px;
+      padding: 12px 28px;
+      background-color: #3498db;
       color: white;
       border: none;
       font-size: 16px;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
 
     #addSupervisorBtn:hover {
-      background-color: #45a049;
+      background-color: #2980b9;
     }
 
     #response {
@@ -55,6 +60,21 @@
       font-weight: bold;
       color: red;
     }
+
+    img.gallery-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .school-detail strong {
+        width: 100%;
+        display: block;
+        margin-bottom: 6px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -62,12 +82,12 @@
   <h2>Superadmin Dashboard</h2>
 
   <div id="school-container">
-    <div class="school-detail"><strong>About Us:</strong> <span id="about_us"></span></div>
-    <div class="school-detail"><strong>Infrastructure:</strong> <span id="infrastructure"></span></div>
-    <div class="school-detail"><strong>Latest News:</strong> <span id="latest_news"></span></div>
-    <div class="school-detail"><strong>Gallery:</strong> <span id="gallery"></span></div>
-    <div class="school-detail"><strong>Contact Us:</strong> <span id="contact_us"></span></div>
-    <div class="school-detail"><strong>Created Date:</strong> <span id="created_date"></span></div>
+    <div class="school-detail"><strong>About Us:</strong> <span id="about_us">-</span></div>
+    <div class="school-detail"><strong>Infrastructure:</strong> <span id="infrastructure">-</span></div>
+    <div class="school-detail"><strong>Latest News:</strong> <span id="latest_news">-</span></div>
+    <div class="school-detail"><strong>Gallery:</strong> <span id="gallery">-</span></div>
+    <div class="school-detail"><strong>Contact Us:</strong> <span id="contact_us">-</span></div>
+    <div class="school-detail"><strong>Created Date:</strong> <span id="created_date">-</span></div>
   </div>
 
   <button id="addSupervisorBtn" onclick="location.href='/addSupervisor'">Add Supervisor</button>
@@ -76,42 +96,53 @@
 
   <script>
     async function fetchSchoolDetails() {
+      const responseElem = document.getElementById("response");
+      responseElem.innerText = "";
+
       try {
         const token = localStorage.getItem("token");
-        const role = localStorage.getItem("role");
-        if (!token) {
-        document.getElementById("response").innerText = "Authentication token missing.";
-        return;
-        }
-        const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-access-token': token
-          }
 
+        if (!token) {
+          responseElem.innerText = "Authentication token missing.";
+          return;
+        }
+
+        const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token
+          }
         });
 
         const result = await res.json();
 
-        if (result.status === "success" && result.res_data.length > 0) {
-          const school = result.res_data[0];
+        if (result.status === "success" && result.res_data && typeof result.res_data === "object") {
+          const school = result.res_data;
 
-          document.getElementById("about_us").innerText = school.about_us;
-          document.getElementById("infrastructure").innerText = school.infrastructure;
-          document.getElementById("latest_news").innerText = school.latest_news;
-          document.getElementById("gallery").innerText = school.gallery;
-          document.getElementById("contact_us").innerText = school.contact_us;
-          document.getElementById("created_date").innerText = school.created_date;
+          document.getElementById("about_us").innerText = school.about_us || "-";
+          document.getElementById("infrastructure").innerText = school.infrastructure || "-";
+          document.getElementById("latest_news").innerText = school.latest_news || "-";
+
+          // Render gallery as image
+          const galleryContainer = document.getElementById("gallery");
+          if (school.gallery && school.gallery !== "-") {
+            galleryContainer.innerHTML = `<img src="data:image/jpeg;base64,${school.gallery}" alt="School Gallery" class="gallery-img" />`;
+          } else {
+            galleryContainer.innerText = "-";
+          }
+
+          document.getElementById("contact_us").innerText = school.contact_us || "-";
+          document.getElementById("created_date").innerText = school.created_date || "-";
         } else {
-          document.getElementById("response").innerText = result.message || "No school data found.";
+          responseElem.innerText = result.message || "No school data found.";
         }
       } catch (error) {
-        document.getElementById("response").innerText = "Error: " + error.message;
+        responseElem.innerText = "Error: " + error.message;
       }
     }
 
-    // Call on load
+    // Load data on page load
     fetchSchoolDetails();
   </script>
 </body>

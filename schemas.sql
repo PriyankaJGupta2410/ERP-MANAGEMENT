@@ -124,16 +124,18 @@ CREATE TABLE student_master (
 );
 
 CREATE TABLE staff_master (
-    _id VARCHAR(36) PRIMARY KEY,
-    user_id VARCHAR(36) NOT NULL,
+    _id CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    school_id CHAR(36) NOT NULL,
     salary DECIMAL(10, 2) NOT NULL,
     join_date DATE NOT NULL,
     status VARCHAR(20) DEFAULT 'Active',
     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(36),
+    created_by CHAR(36),
     FOREIGN KEY (user_id) REFERENCES user_master(_id),
-    FOREIGN KEY (created_by) REFERENCES user_master(_id)
+    FOREIGN KEY (created_by) REFERENCES user_master(_id),
+    FOREIGN KEY (school_id) REFERENCES school_master(_id)
 );
 
 

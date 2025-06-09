@@ -55,6 +55,21 @@
       font-weight: bold;
       color: red;
     }
+
+    img.gallery-img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .school-detail strong {
+        width: 100%;
+        display: block;
+        margin-bottom: 6px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -62,12 +77,12 @@
   <h2>Vice Principal Dashboard</h2>
 
   <div id="school-container">
-    <div class="school-detail"><strong>About Us:</strong> <span id="about_us"></span></div>
-    <div class="school-detail"><strong>Infrastructure:</strong> <span id="infrastructure"></span></div>
-    <div class="school-detail"><strong>Latest News:</strong> <span id="latest_news"></span></div>
-    <div class="school-detail"><strong>Gallery:</strong> <span id="gallery"></span></div>
-    <div class="school-detail"><strong>Contact Us:</strong> <span id="contact_us"></span></div>
-    <div class="school-detail"><strong>Created Date:</strong> <span id="created_date"></span></div>
+    <div class="school-detail"><strong>About Us:</strong> <span id="about_us">-</span></div>
+    <div class="school-detail"><strong>Infrastructure:</strong> <span id="infrastructure">-</span></div>
+    <div class="school-detail"><strong>Latest News:</strong> <span id="latest_news">-</span></div>
+    <div class="school-detail"><strong>Gallery:</strong> <span id="gallery">-</span></div>
+    <div class="school-detail"><strong>Contact Us:</strong> <span id="contact_us">-</span></div>
+    <div class="school-detail"><strong>Created Date:</strong> <span id="created_date">-</span></div>
   </div>
 
   <button id="addSupervisorBtn" onclick="location.href='/addStaff'">Add Staff</button>
@@ -76,42 +91,52 @@
 
   <script>
     async function fetchSchoolDetails() {
+      const responseElem = document.getElementById("response");
+      responseElem.innerText = "";
+
       try {
         const token = localStorage.getItem("token");
-        const role = localStorage.getItem("role");
-        if (!token) {
-        document.getElementById("response").innerText = "Authentication token missing.";
-        return;
-        }
-        const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-access-token': token
-          }
 
+        if (!token) {
+          responseElem.innerText = "Authentication token missing.";
+          return;
+        }
+
+        const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token
+          }
         });
 
         const result = await res.json();
 
-        if (result.status === "success" && result.res_data.length > 0) {
-          const school = result.res_data[0];
+        if (result.status === "success" && result.res_data && typeof result.res_data === "object") {
+          const school = result.res_data;
 
-          document.getElementById("about_us").innerText = school.about_us;
-          document.getElementById("infrastructure").innerText = school.infrastructure;
-          document.getElementById("latest_news").innerText = school.latest_news;
-          document.getElementById("gallery").innerText = school.gallery;
-          document.getElementById("contact_us").innerText = school.contact_us;
-          document.getElementById("created_date").innerText = school.created_date;
+          document.getElementById("about_us").innerText = school.about_us || "-";
+          document.getElementById("infrastructure").innerText = school.infrastructure || "-";
+          document.getElementById("latest_news").innerText = school.latest_news || "-";
+
+          // Render gallery as image
+          const galleryContainer = document.getElementById("gallery");
+          if (school.gallery && school.gallery !== "-") {
+            galleryContainer.innerHTML = `<img src="data:image/jpeg;base64,${school.gallery}" alt="School Gallery" class="gallery-img" />`;
+          } else {
+            galleryContainer.innerText = "-";
+          }
+
+          document.getElementById("contact_us").innerText = school.contact_us || "-";
+          document.getElementById("created_date").innerText = school.created_date || "-";
         } else {
-          document.getElementById("response").innerText = result.message || "No school data found.";
+          responseElem.innerText = result.message || "No school data found.";
         }
       } catch (error) {
-        document.getElementById("response").innerText = "Error: " + error.message;
+        responseElem.innerText = "Error: " + error.message;
       }
     }
 
-    // Call on load
     fetchSchoolDetails();
   </script>
 </body>

@@ -63,7 +63,7 @@
 </head>
 <body>
 
-  <a href="/Superadmindashboard" id="dashboard-btn">Go to Dashboard</a>
+  <a href="#" id="dashboard-btn">Go to Dashboard</a>
 
   <h2>All Staff Records</h2>
 
@@ -71,6 +71,21 @@
   <div id="staffTable"></div>
 
   <script>
+    // Set dashboard URL based on role
+    function redirectToDashboard() {
+      const role = localStorage.getItem("role");
+      const dashboardBtn = document.getElementById("dashboard-btn");
+
+      if (role === "Superadmin") {
+        dashboardBtn.setAttribute("href", "/Superadmindashboard");
+      } else if (role === "supervisor") {
+        dashboardBtn.setAttribute("href", "/Supervisordashboard");
+      } else {
+        dashboardBtn.style.display = "none"; // Hide the button for unknown roles
+        document.getElementById("error-message").innerText = "Unauthorized role or role not found.";
+      }
+    }
+
     async function fetchStaffData() {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -126,7 +141,10 @@
       }
     }
 
-    window.onload = fetchStaffData;
+    window.onload = function () {
+      redirectToDashboard();
+      fetchStaffData();
+    };
   </script>
 
 </body>

@@ -103,11 +103,16 @@
         const token = result.res_data.token;
 
         localStorage.setItem('token', token);
+        localStorage.setItem('role',role)
 
         // Delay before redirect
         setTimeout(() => {
           if (role && role.toLowerCase() === 'superadmin') {
             window.location.href = '/Superadmindashboard';
+          } else if (role && role.toLowerCase() === 'supervisor') {
+            window.location.href = '/Supervisordashboard';
+          } else if (role && role.toLowerCase() === 'accountant') {
+            window.location.href = '/AccountantDashboard';
           } else {
             window.location.href = '/success';
           }

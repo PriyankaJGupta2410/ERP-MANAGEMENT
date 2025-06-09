@@ -11,6 +11,7 @@ import smtplib
 from email.mime.text import MIMEText
 import random
 import uuid
+from werkzeug.utils import secure_filename
 
 
 load_dotenv()
@@ -52,12 +53,13 @@ def login():
     res_data = {}
     status = "fail"
     code = 500
+
     try:
         data = request.json
         email = data.get('email')
-        password = data.get('password')
+        input_password = data.get('password')  # Don't overwrite this later
 
-        if not email or not password:
+        if not email or not input_password:
             message = "Email and password are required."
             code = 400
 
@@ -66,28 +68,22 @@ def login():
             db.execute(query, (email,))
             user = db.fetchone()
 
-            if user and check_password_hash(user[5], password):
-                otp = str(random.randint(100000, 999999))
+            if user and check_password_hash(user.get("password"), input_password):
+                otp = "123456"  # Static OTP for testing
                 session['otp'] = otp
                 session['email'] = email
-                session['user_id'] = user[0]
+                session['user_id'] = user.get("_id")
 
-                success, error = send_otp_email(email, otp)
-
-                if success:
-                    status = "success"
-                    code = 200
-                    message = "OTP sent to your email for verification."
-                    res_data = {
-                        "user_id": user[0],
-                        "email": user[3],
-                        "role": user[1],
-                        "username": user[2],
-                        "contact": user[4]
-                    }
-                else:
-                    message = f"Failed to send OTP: {error}"
-                    code = 500
+                status = "success"
+                code = 200
+                message = "OTP generated and stored in session for verification (email not sent)."
+                res_data = {
+                    "user_id": user.get("_id"),
+                    "email": user.get("email"),
+                    "role": user.get("role"),
+                    "username": user.get("username"),
+                    "contact": user.get("contact")
+                }
             else:
                 message = "Invalid email or password."
                 code = 401
@@ -96,7 +92,10 @@ def login():
         message = f"Error: {str(ex)}"
         code = 500
 
-    return jsonify({"status": status,"code": code,"message": message,"res_data": res_data})
+    return jsonify({
+        "status": status,
+        "code": code,
+        "message": message,"res_data": res_data})
 
 @auth_bp.route('/verify-otp', methods=['POST'])
 def verify_otp():
@@ -122,8 +121,8 @@ def verify_otp():
             user = db.fetchone()
 
             if user:
-                user_id = user[0]
-                role = user[1]
+                user_id = user.get("_id")
+                role = user.get("role")
 
                 token = generate_token(user_id, email)
 
@@ -160,45 +159,50 @@ def RegisterSuperadmin():
     res_data = {}
 
     try:
-        data = request.json
-        username = data.get("username")
-        email = data.get("email")
-        role = data.get("role")
-        contact = data.get("contact")
-        password = data.get("password")
+        username = request.form.get("username")
+        email = request.form.get("email")
+        role = request.form.get("role")
+        contact = request.form.get("contact")
+        password = request.form.get("password")
+        profilepic_file = request.files.get("profilepic")
 
         if not all([username, email, role, contact, password]):
-            message = "All fields (username, email, role, contact, password) are required."
-            return jsonify({"status": status, "code": 400, "message": message, "res_data": res_data})
+            return jsonify({"status": "fail", "code": 400, "message": "All fields are required", "res_data": {}})
 
         hashed_password = generate_password_hash(password)
         superadmin_id = str(uuid.uuid4())
         created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        profilepic_data = profilepic_file.read() if profilepic_file else None
 
         query = """INSERT INTO user_master 
-                   (_id, username, email, password, role, contact, created_date) 
-                   VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-        values = (superadmin_id, username, email, hashed_password, role, contact, created_date)
+                   (_id, username, email, password, role, contact, profile_image, created_date) 
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+        values = (superadmin_id, username, email, hashed_password, role, contact, profilepic_data, created_date)
 
         db.execute(query, values)
         conn.commit()
 
-        message = "Superadmin registration done successfully"
-        code = 200
-        status = "success"
-        res_data = {
-            "_id": superadmin_id,
-            "username": username,
-            "email": email,
-            "role": role,
-            "contact": contact,
-            "created_date": created_date
-        }
+        return jsonify({
+            "status": "success",
+            "code": 200,
+            "message": "Superadmin registered successfully",
+            "res_data": {
+                "_id": superadmin_id,
+                "username": username,
+                "email": email,
+                "role": role,
+                "contact": contact,
+                "created_date": created_date,
+                "profile_image" : profilepic_data
+            }
+        })
     except Exception as ex:
-        message = f"RegisterSuperadmin: {ex}"
-
-    return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
-
+        return jsonify({
+            "status": "fail",
+            "code": 500,
+            "message": f"RegisterSuperadmin Error: {str(ex)}",
+            "res_data": {}
+        })
 
 @auth_bp.route('/RegisterSchool', methods=['POST'])
 def RegisterSchool():
@@ -206,43 +210,47 @@ def RegisterSchool():
     code = 500
     status = "fail"
     res_data = {}
-    try:
-        data = request.json
-        superadmin_id = data.get("superadmin_id")
-        about = data.get("about")
-        infrastructure = data.get("infrastructure")
-        news = data.get("news")
-        gallery = data.get("gallery")
-        contact = data.get("contact")
 
-        if not all([superadmin_id, about, infrastructure, news, gallery, contact]):
-            message = "All fields (superadmin_id, about, infrastructure, news, gallery, contact) are required."
-            return jsonify({"status": status, "code": 400, "message": message, "res_data": res_data})
+    try:
+        superadmin_id = request.form.get("superadmin_id")
+        about = request.form.get("about")
+        infrastructure = request.form.get("infrastructure")
+        news = request.form.get("news")
+        contact = request.form.get("contact")
+        gallery_file = request.files.get("gallery")
+
+        if not all([superadmin_id, about, infrastructure, news, contact, gallery_file]):
+            return jsonify({"status": status, "code": 400, "message": "All fields are required", "res_data": {}})
 
         school_id = str(uuid.uuid4())
         created_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        gallery_data = gallery_file.read()
 
-        query = """
+        insert_query = """
             INSERT INTO school_master (_id, superadmin_id, about_us, infrastructure, latest_news, gallery, contact_us, created_date)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
-        values = (school_id, superadmin_id, about, infrastructure, news, gallery, contact, created_date)
-        db.execute(query, values)
+        db.execute(insert_query, (school_id, superadmin_id, about, infrastructure, news, gallery_data, contact, created_date))
+
+        db.execute("UPDATE user_master SET school_id = %s WHERE _id = %s", (school_id, superadmin_id))
         conn.commit()
-        message = "School details register successfully"
-        code =200
-        status = "success"
+
         res_data = {
             "school_id": school_id,
             "superadmin_id": superadmin_id,
             "about_us": about,
             "infrastructure": infrastructure,
             "latest_news": news,
-            "gallery": gallery,
             "contact_us": contact,
             "created_date": created_date
         }
+        status = "success"
+        code = 200
+        message = "School registered successfully"
     except Exception as ex:
-        message = f"RegisterSchool:{ex}"
-    return jsonify({"status": status,"code": code,"message": message,"res_data": res_data})
+        message = f"RegisterSchool: {ex}"
+
+    return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
+
+
 

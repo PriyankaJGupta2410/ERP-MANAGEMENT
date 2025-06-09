@@ -1,72 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Register Superadmin</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
+      background-color: #f7f9fc;
     }
     h2 {
       color: #333;
       text-align: center;
+      margin-bottom: 20px;
     }
     form {
-      max-width: 400px;
+      max-width: 450px;
       margin: auto;
+      background: #ffffff;
+      padding: 25px 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
     }
     label {
       display: block;
       margin-top: 15px;
+      font-weight: bold;
+      color: #444;
     }
-    input {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="file"],
+    input[type="hidden"] {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       box-sizing: border-box;
     }
-    .button-container {
-      margin-top: 25px;
-      text-align: center;
-    }
     input[type="submit"] {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
       background-color: #4CAF50;
       color: white;
       border: none;
-      padding: 10px 20px;
       font-size: 16px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    input[type="submit"]:hover {
+      background-color: #45a049;
     }
     #response {
       margin-top: 20px;
-      color: red;
-      font-weight: bold;
       text-align: center;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
     }
   </style>
 </head>
 <body>
   <h2>Register Superadmin</h2>
-  <form id="superadminForm">
-    <label>Username:</label>
-    <input type="text" name="username" required>
+  <form id="superadminForm" enctype="multipart/form-data">
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username" required />
 
-    <label>Email:</label>
-    <input type="email" name="email" required>
+    <label for="email">Email:</label>
+    <input type="email" name="email" id="email" required />
 
-    <label>Password:</label>
-    <input type="password" name="password" required>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required />
 
-    <label>Contact:</label>
-    <input type="text" name="contact" pattern="[0-9]{10}" title="Enter 10 digit mobile number" required>
+    <label for="contact">Contact:</label>
+    <input type="text" name="contact" id="contact" pattern="[0-9]{10}" title="Enter a valid 10-digit mobile number" required />
 
-    <!-- Hidden Role -->
-    <input type="hidden" name="role" value="Superadmin">
+    <label for="profilepic">Profile Picture:</label>
+    <input type="file" name="profilepic" id="profilepic" accept="image/*" />
 
-    <div class="button-container">
-      <input type="submit" value="Register">
-    </div>
+    <input type="hidden" name="role" value="Superadmin" />
+
+    <input type="submit" value="Register" />
   </form>
 
   <p id="response"></p>
@@ -77,26 +99,39 @@
 
       const form = e.target;
       const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
+      const responseElem = document.getElementById('response');
+      responseElem.innerText = "";
+      responseElem.className = "";
 
       try {
         const res = await fetch('http://127.0.0.1:5000/auth/RegisterSuperadmin', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+          body: formData
         });
 
-        const result = await res.json();
+        let result;
+        try {
+          result = await res.json();
+        } catch (jsonErr) {
+          responseElem.innerText = "Invalid JSON response from server.";
+          responseElem.className = "error";
+          return;
+        }
 
         if (res.ok && result.status === "success") {
           localStorage.setItem('superadmin_id', result.res_data._id);
-          alert(result.message);
-          window.location.href = "/registerSchool"; // make sure this file path is correct
+          responseElem.innerText = result.message;
+          responseElem.className = "success";
+          setTimeout(() => {
+            window.location.href = "/registerSchool";
+          }, 1500);
         } else {
-          document.getElementById('response').innerText = result.message || "Registration failed";
+          responseElem.innerText = result.message || "Registration failed.";
+          responseElem.className = "error";
         }
       } catch (error) {
-        document.getElementById('response').innerText = "Error: " + error.message;
+        responseElem.innerText = "Error: " + error.message;
+        responseElem.className = "error";
       }
     });
   </script>

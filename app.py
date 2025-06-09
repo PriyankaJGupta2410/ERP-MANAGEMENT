@@ -36,7 +36,7 @@ def login():
 
 @app.route('/admission_form')
 def admission_form():
-    return render_template('admission.html') 
+    return render_template('add_admission.html') 
 
 @app.route('/SendOtp')
 def SendOtp():
@@ -69,6 +69,18 @@ def Getstaff():
 @app.route('/Superadmindashboard')
 def Superadmindashboard():
     return render_template('superadmin_dashboard.html')
+
+@app.route('/Supervisordashboard')
+def Supervisordashboard():
+    return render_template('supervisor_dashboard.html')
+
+@app.route('/addStaff')
+def addStaff():
+    return render_template('add_staff.html')
+
+@app.route('/AccountantDashboard')
+def AccountantDashboard():
+    return render_template('accountant_dashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

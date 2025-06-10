@@ -9,6 +9,8 @@ from auth.auth import auth_bp
 from admission.admission import admission_bp
 from staff.staff import staff_bp
 from school.school import school_bp
+from fee.fee import fee_bp
+from classbp.classbp import class_bp
 #############################################
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
@@ -18,7 +20,8 @@ app.register_blueprint(auth_bp, url_prefix = "/auth")
 app.register_blueprint(admission_bp,url_prefix = "/admissions")
 app.register_blueprint(staff_bp,url_prefix = '/staff')
 app.register_blueprint(school_bp,url_prefix = '/school')
-
+app.register_blueprint(fee_bp,url_prefix="/fee")
+app.register_blueprint(class_bp,url_prefix="/class")
 ####################################################################
 
 @app.route("/")
@@ -81,6 +84,18 @@ def addStaff():
 @app.route('/AccountantDashboard')
 def AccountantDashboard():
     return render_template('accountant_dashboard.html')
+
+@app.route('/forgotpassword')
+def forgotpassword():
+    return render_template('forgot_password.html')
+
+@app.route('/resetpassword')
+def resetpassword():
+    return render_template('reset_password.html')
+
+@app.route('/forgotverifyotp')
+def forgotverifyotp():
+    return render_template('forgot_verify_otp.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

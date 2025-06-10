@@ -51,6 +51,21 @@
   button:hover {
     background-color: #0056b3;
   }
+
+   #forgotPasswordBtn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    background-color: #6c757d;
+    color: white;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  #forgotPasswordBtn:hover {
+    background-color: #5a6268;
+  }
   #message {
     margin-top: 15px;
     text-align: center;
@@ -71,6 +86,7 @@
 
     <button type="submit">Login</button>
   </form>
+  <button id="forgotPasswordBtn">Forgot Password?</button>
   <div id="message"></div>
 </div>
 
@@ -104,6 +120,11 @@
       messageDiv.style.color = 'red';
       messageDiv.textContent = 'Error connecting to server.';
     }
+  });
+
+  forgotPasswordBtn.addEventListener('click', () => {
+    // Redirect to your forgot password page
+    window.location.href = '/forgotpassword';
   });
 </script>
 

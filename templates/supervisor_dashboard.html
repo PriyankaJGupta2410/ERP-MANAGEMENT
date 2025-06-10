@@ -96,6 +96,7 @@
 
       try {
         const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
 
         if (!token) {
           responseElem.innerText = "Authentication token missing.";

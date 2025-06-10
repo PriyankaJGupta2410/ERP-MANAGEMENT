@@ -1,70 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Superadmin Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Accountant Dashboard</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f2f5;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f9f9f9;
     }
 
     h2 {
       text-align: center;
-      color: #2c3e50;
-      margin-top: 30px;
+      color: #333;
     }
 
     #school-container {
       max-width: 900px;
-      margin: 30px auto;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin: 20px auto;
+      background-color: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .school-detail {
-      margin-bottom: 20px;
-      font-size: 16px;
+      margin-bottom: 15px;
     }
 
     .school-detail strong {
       display: inline-block;
-      width: 160px;
-      color: #333;
+      width: 140px;
     }
 
-    #addSupervisorBtn,
-    #logoutBtn {
+    #admission_btn {
       display: block;
-      margin: 10px auto 20px;
-      padding: 12px 28px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
+      margin: 30px auto 0;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
       border: none;
-      transition: background-color 0.3s ease;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    #addSupervisorBtn {
-      background-color: #3498db;
-      color: white;
-    }
-
-    #addSupervisorBtn:hover {
-      background-color: #2980b9;
-    }
-
-    #logoutBtn {
-      background-color: #e74c3c;
-      color: white;
-    }
-
-    #logoutBtn:hover {
-      background-color: #c0392b;
+    #admission_btn:hover {
+      background-color: #45a049;
     }
 
     #response {
@@ -92,7 +74,7 @@
 </head>
 <body>
 
-  <h2>Superadmin Dashboard</h2>
+  <h2>Accountant Dashboard</h2>
 
   <div id="school-container">
     <div class="school-detail"><strong>About Us:</strong> <span id="about_us">-</span></div>
@@ -103,30 +85,26 @@
     <div class="school-detail"><strong>Created Date:</strong> <span id="created_date">-</span></div>
   </div>
 
-  <button id="addSupervisorBtn" onclick="location.href='/addSupervisor'">Add Supervisor</button>
-  <button id="logoutBtn">Logout</button>
+  <button id="admission_btn" onclick="location.href='/admission_form'">Fill Admission Form</button>
 
   <p id="response"></p>
 
   <script>
     async function fetchSchoolDetails() {
-      const responseElem = document.getElementById("response");
-      responseElem.innerText = "";
-
       try {
         const token = localStorage.getItem("token");
-
+        const role = localStorage.getItem("role");
         if (!token) {
-          responseElem.innerText = "Authentication token missing.";
-          return;
+        document.getElementById("response").innerText = "Authentication token missing.";
+        return;
         }
-
         const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
-            "x-access-token": token
+            'Content-Type': 'application/json',
+            'x-access-token': token
           }
+
         });
 
         const result = await res.json();
@@ -156,39 +134,8 @@
       }
     }
 
-    async function handleLogout() {
-      const responseElem = document.getElementById("response");
-      responseElem.innerText = "";
-
-      try {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch("http://127.0.0.1:5000/auth/logout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": token
-          }
-        });
-
-        const result = await res.json();
-
-        if (result.status === "success") {
-          localStorage.removeItem("token");
-          window.location.href = "/login"; // Redirect to login page
-        } else {
-          responseElem.innerText = result.message || "Logout failed.";
-        }
-      } catch (error) {
-        responseElem.innerText = "Error during logout: " + error.message;
-      }
-    }
-
-    // Load data on page load
+    // Call on load
     fetchSchoolDetails();
-
-    // Attach logout handler
-    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
   </script>
 </body>
 </html>

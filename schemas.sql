@@ -1,7 +1,5 @@
 CREATE TABLE admission_master (
     _id CHAR(36) PRIMARY KEY,
-    
-    -- Personal Information
     first_name VARCHAR(100),
     middle_name VARCHAR(100),
     last_name VARCHAR(100),
@@ -21,69 +19,61 @@ CREATE TABLE admission_master (
     blood_group VARCHAR(10),
     guardian_mobile VARCHAR(15),
     mother_mobile VARCHAR(15),
-    earning_parent_income VARCHAR(20),
+    earning_parent_income VARCHAR(50),
     earning_parent_pan VARCHAR(20),
-
-    -- Current Address
-    current_line1 VARCHAR(255),
-    current_city VARCHAR(100),
-    current_state VARCHAR(100),
-    current_zip VARCHAR(10),
-
-    -- Permanent Address
-    permanent_line1 VARCHAR(255),
-    permanent_city VARCHAR(100),
-    permanent_state VARCHAR(100),
-    permanent_zip VARCHAR(10),
-
-    -- Admission Info
-    admission_category VARCHAR(100),
-    caste_category VARCHAR(100),
+    admission_category VARCHAR(50),
+    caste_category VARCHAR(50),
     caste_subcaste VARCHAR(100),
-    caste_validity_no VARCHAR(50),
-    eligibility_no VARCHAR(50),
-    general_reg_no VARCHAR(50),
-    course VARCHAR(100),
-    academic_year VARCHAR(20),
-
-    -- Banking Info
+    caste_validity_no VARCHAR(100),
+    eligibility_no VARCHAR(100),
+    general_reg_no VARCHAR(100),
     bank_name VARCHAR(100),
     branch VARCHAR(100),
-    account_no VARCHAR(30),
+    account_no VARCHAR(20),
     ifsc_code VARCHAR(20),
     micr_code VARCHAR(20),
-
-    -- Academic Info
-    last_institute_name VARCHAR(255),
+    last_institute_name VARCHAR(150),
     upisc_code VARCHAR(50),
     migration_cert_no VARCHAR(50),
     lc_tc_no VARCHAR(50),
-
-    -- Qualifying Exam Info
-    exam VARCHAR(100),
+    exam VARCHAR(50),
     exam_body VARCHAR(100),
     passing_month_year VARCHAR(20),
-    obtained_marks VARCHAR(10),
-    out_of_marks VARCHAR(10),
-    percentage VARCHAR(10),
-
-    -- File Paths (you may store paths/URLs here)
-    photo_path VARCHAR(255),
-    signature_path VARCHAR(255),
-
-    -- Fees Info
-    tuition_fee DECIMAL(10,2),
-    admission_fee DECIMAL(10,2),
-    other_fees DECIMAL(10,2),
-    total_fees DECIMAL(10,2),
-
-    -- Optional
-    created_by INT,
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    obtained_marks FLOAT,
+    out_of_marks FLOAT,
+    percentage FLOAT,
+    photo_name VARCHAR(255),
+    photo_data LONGBLOB,
+    signature_name VARCHAR(255),
+    signature_data LONGBLOB,
+    current_address TEXT,
+    permanent_address TEXT,
+    created_by VARCHAR(100),
+    created_date DATETIME
 );
 
 
+CREATE TABLE fee_master (
+    _id CHAR(36) NOT NULL PRIMARY KEY,
+    fee_type VARCHAR(100) NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    class VARCHAR(20),
+    section VARCHAR(10),
+    academic_year VARCHAR(20) NOT NULL,
+    created_by VARCHAR(36),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE class_master (
+    _id CHAR(36) PRIMARY KEY,
+    class_name VARCHAR(50) NOT NULL,
+    section VARCHAR(10) NOT NULL,
+    academic_year VARCHAR(20) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by VARCHAR(100),
+    created_date DATETIME
+);
 
 
 CREATE TABLE user_master (

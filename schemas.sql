@@ -1,56 +1,56 @@
 CREATE TABLE admission_master (
-    _id CHAR(36) PRIMARY KEY,
+    admission_form_no INT AUTO_INCREMENT PRIMARY KEY,  -- 4-digit auto increment ID
+    _id VARCHAR(36) NOT NULL UNIQUE,                   -- UUID
     first_name VARCHAR(100),
     middle_name VARCHAR(100),
     last_name VARCHAR(100),
     email VARCHAR(100),
-    mobile_number VARCHAR(15),
+    mobile_number VARCHAR(20),
     gender VARCHAR(10),
     religion VARCHAR(50),
     dob DATE,
     birth_place VARCHAR(100),
     nationality VARCHAR(50),
-    disability VARCHAR(100),
+    disability VARCHAR(50),
     domicile_state VARCHAR(100),
     aadhar_no VARCHAR(20),
     mother_name VARCHAR(100),
     mother_tongue VARCHAR(50),
     locality VARCHAR(100),
     blood_group VARCHAR(10),
-    guardian_mobile VARCHAR(15),
-    mother_mobile VARCHAR(15),
+    guardian_mobile VARCHAR(20),
+    mother_mobile VARCHAR(20),
     earning_parent_income VARCHAR(50),
     earning_parent_pan VARCHAR(20),
-    admission_category VARCHAR(50),
-    caste_category VARCHAR(50),
+    admission_category VARCHAR(100),
+    caste_category VARCHAR(100),
     caste_subcaste VARCHAR(100),
-    caste_validity_no VARCHAR(100),
-    eligibility_no VARCHAR(100),
-    general_reg_no VARCHAR(100),
+    caste_validity_no VARCHAR(50),
+    eligibility_no VARCHAR(50),
+    general_reg_no VARCHAR(50),
     bank_name VARCHAR(100),
     branch VARCHAR(100),
-    account_no VARCHAR(20),
+    account_no VARCHAR(50),
     ifsc_code VARCHAR(20),
     micr_code VARCHAR(20),
     last_institute_name VARCHAR(150),
-    upisc_code VARCHAR(50),
+    upisc_code VARCHAR(20),
     migration_cert_no VARCHAR(50),
     lc_tc_no VARCHAR(50),
     exam VARCHAR(50),
     exam_body VARCHAR(100),
     passing_month_year VARCHAR(20),
-    obtained_marks FLOAT,
-    out_of_marks FLOAT,
-    percentage FLOAT,
-    photo_name VARCHAR(255),
+    obtained_marks DECIMAL(10,2),
+    out_of_marks DECIMAL(10,2),
+    percentage DECIMAL(5,2),
     photo_data LONGBLOB,
-    signature_name VARCHAR(255),
     signature_data LONGBLOB,
     current_address TEXT,
     permanent_address TEXT,
-    created_by VARCHAR(100),
-    created_date DATETIME
-);
+    created_by VARCHAR(36),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP
+) AUTO_INCREMENT = 1000;
+
 
 
 CREATE TABLE fee_master (
@@ -92,26 +92,53 @@ CREATE TABLE user_master (
 );
 
 CREATE TABLE parent_master (
-	_id CHAR(36) PRIMARY KEY,
-    user_id CHAR(36),
-    address JSON,
-    FOREIGN KEY (user_id) REFERENCES user_master(_id),
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    _id CHAR(36) PRIMARY KEY,
+    user_id CHAR(36) NOT NULL,
+    student_id CHAR(36) NOT NULL,
+    occupation VARCHAR(100),
+    relation VARCHAR(50),
+    address TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by CHAR(36),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+	FOREIGN KEY (user_id) REFERENCES user_master(_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+	FOREIGN KEY (student_id) REFERENCES student_master(_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    FOREIGN KEY (created_by) REFERENCES user_master(_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
+
+
 
 CREATE TABLE student_master (
     _id CHAR(36) PRIMARY KEY,
+    admission_id CHAR(36),
     user_id CHAR(36),
-    parent_id CHAR(36),
-    dob DATE,
-    class_name VARCHAR(100),
-    section VARCHAR(50),
-    FOREIGN KEY (user_id) REFERENCES user_master(_id),
-    FOREIGN KEY (parent_id) REFERENCES parent_master(_id),
-    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    class_id VARCHAR(50),
+    roll_number VARCHAR(20),
+    academic_year VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by CHAR(36),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_admission FOREIGN KEY (admission_id) REFERENCES admission_master(_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES user_master(_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_creator FOREIGN KEY (created_by) REFERENCES user_master(_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
+
+
+
+
+
 
 CREATE TABLE staff_master (
     _id CHAR(36) PRIMARY KEY,
@@ -164,6 +191,36 @@ CREATE TABLE school_master (
 
     CONSTRAINT fk_superadmin FOREIGN KEY (superadmin_id) REFERENCES user_master(_id)
         ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+########################### STORE MODULE ############################
+CREATE TABLE ItemCategory (
+    _id CHAR(36) PRIMARY KEY,
+    name VARCHAR(50),
+    description TEXT
+);
+
+CREATE TABLE Item (
+    _id CHAR(36) PRIMARY KEY,
+    name VARCHAR(100),
+    category_id CHAR(36),
+    quantity INT,
+    unit VARCHAR(20),
+    min_stock_alert INT,
+    description TEXT,
+    FOREIGN KEY (category_id) REFERENCES ItemCategory(_id)
+);
+
+CREATE TABLE StockTransaction (
+    _id CHAR(36) PRIMARY KEY,
+    item_id CHAR(36),
+    transaction_date DATE,
+    transaction_type ENUM('ISSUE', 'RETURN'),
+    quantity INT,
+    issued_to VARCHAR(50),
+    returned_by VARCHAR(50),
+    remarks TEXT,
+    FOREIGN KEY (item_id) REFERENCES Item(_id)
 );
 
 

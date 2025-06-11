@@ -323,6 +323,13 @@ def RegisterSchool():
 
     try:
         superadmin_id = request.form.get("superadmin_id")
+        school_name = request.form.get("school_name")
+        principal_name = request.form.get("principal_name")
+        contact_email = request.form.get("contact_email")
+        contact_phone = request.form.get("contact_phone")
+        established_year = request.form.get("established_year")
+        vision = request.form.get("vision")
+        mission = request.form.get("mission")
         about = request.form.get("about")
         infrastructure = request.form.get("infrastructure")
         news = request.form.get("news")
@@ -337,10 +344,17 @@ def RegisterSchool():
         gallery_data = gallery_file.read()
 
         insert_query = """
-            INSERT INTO school_master (_id, superadmin_id, about_us, infrastructure, latest_news, gallery, contact_us, created_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO school_master (
+                _id, superadmin_id, school_name, principal_name, contact_email, contact_phone,
+                established_year, vision, mission, about_us, infrastructure,
+                latest_news, gallery, contact_us, created_date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        db.execute(insert_query, (school_id, superadmin_id, about, infrastructure, news, gallery_data, contact, created_date))
+        db.execute(insert_query, (
+            school_id, superadmin_id, school_name, principal_name, contact_email, contact_phone,
+            established_year, vision, mission, about, infrastructure,
+            news, gallery_data, contact, created_date
+        ))
 
         db.execute("UPDATE user_master SET school_id = %s WHERE _id = %s", (school_id, superadmin_id))
         conn.commit()
@@ -348,6 +362,13 @@ def RegisterSchool():
         res_data = {
             "school_id": school_id,
             "superadmin_id": superadmin_id,
+            "school_name": school_name,
+            "principal_name": principal_name,
+            "contact_email": contact_email,
+            "contact_phone": contact_phone,
+            "established_year": established_year,
+            "vision": vision,
+            "mission": mission,
             "about_us": about,
             "infrastructure": infrastructure,
             "latest_news": news,
@@ -381,31 +402,43 @@ def register_student(current_user_id=None):
         email = data.get("email")
         contact = data.get("contact")
         username = data.get("username")
-        password = data.get("password")  # ✅ Take password from input
+        password = data.get("password")
 
-        if not all([username, email, contact, password]):
-            raise Exception("Missing required user fields")
-
+        if not all([admission_id, class_id, roll_number, academic_year, email, contact, username, password]):
+            message = "All fields are required"
+            code = 400
+            return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
         user_id = str(uuid.uuid4())
         hashed_password = generate_password_hash(password)
 
-        # Insert into user_master
+        db.execute("SELECT school_id FROM user_master WHERE _id = %s", (current_user_id,))
+        school_row = db.fetchone()
+        school_id = school_row.get("school_id") if school_row else None
+
         db.execute("""
             INSERT INTO user_master (
-                _id, username, email, contact, password, role, created_by, created_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
-        """, (user_id, username, email, contact, hashed_password, "student", current_user_id))
+                _id, username, email, contact, password, role, school_id,
+                profile_image, status, created_date, login_date, modified_date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NULL, 'Active', NOW(), NOW(), NOW())
+        """, (
+            user_id, username, email, contact, hashed_password, "student", school_id
+        ))
 
         # Insert into student_master
         db.execute("""
             INSERT INTO student_master (
-                student_id, admission_id, user_id, class_id, roll_number,
+                _id, admission_id, user_id, class_id, roll_number,
                 academic_year, is_active, created_by, created_date
             ) VALUES (%s, %s, %s, %s, %s, %s, TRUE, %s, NOW())
-        """, (student_id, admission_id, user_id, class_id, roll_number, academic_year, current_user_id))
+        """, (
+            student_id, admission_id, user_id, class_id, roll_number,
+            academic_year, current_user_id
+        ))
+
+        conn.commit()
 
         status = "success"
-        code = 201
+        code = 200
         message = "Student registered successfully"
         res_data = {"student_id": student_id, "user_id": user_id}
 
@@ -413,7 +446,6 @@ def register_student(current_user_id=None):
         message = f"register_student: {str(ex)}"
 
     return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
-
 #################### Parent Registration API #############################
 @auth_bp.route('/register_parent', methods=['POST'])
 @authentication
@@ -426,6 +458,7 @@ def register_parent(current_user_id=None):
     try:
         data = request.json
         parent_id = str(uuid.uuid4())
+        student_id = data.get("student_id")
         occupation = data.get("occupation")
         relation = data.get("relation")
         address = data.get("address")
@@ -434,32 +467,48 @@ def register_parent(current_user_id=None):
         username = data.get("username")
         password = data.get("password") 
 
-        if not all([username, email, contact, password]):
-            raise Exception("Missing required user fields")
-
+        if not all([parent_id, occupation, relation, address, email, contact, username, password]):
+            message = "All fields are required"
+            code = 400
+            return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
+        
         user_id = str(uuid.uuid4())
         hashed_password = generate_password_hash(password)
 
+        db.execute("SELECT school_id FROM user_master WHERE _id = %s", (current_user_id,))
+        school_row = db.fetchone()
+        school_id = school_row.get("school_id") if school_row else None
+
+        # Insert into user_master
         db.execute("""
             INSERT INTO user_master (
-                _id, username, email, contact, password, role, created_by, created_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
-        """, (user_id, username, email, contact, hashed_password, "parent", current_user_id))
+                _id, username, email, contact, password, role, school_id,
+                profile_image, status, created_date, login_date, modified_date
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NULL, 'Active', NOW(), NOW(), NOW())
+        """, (
+            user_id, username, email, contact, hashed_password, "parent", school_id
+        ))
 
+        # Insert into parent_master
         db.execute("""
             INSERT INTO parent_master (
-                parent_id, user_id, occupation, relation, address,
+                _id, user_id, student_id, occupation, relation, address,
                 is_active, created_by, created_date
-            ) VALUES (%s, %s, %s, %s, %s, TRUE, %s, NOW())
-        """, (parent_id, user_id, occupation, relation, address, current_user_id))
+            ) VALUES (%s, %s, %s, %s, %s, %s, TRUE, %s, NOW())
+        """, (
+            parent_id, user_id, student_id, occupation, relation, address, current_user_id
+        ))
+
+        conn.commit()
 
         status = "success"
         code = 201
         message = "Parent registered successfully"
-        res_data = {"parent_id": parent_id, "user_id": user_id}
+        res_data = {"parent_id": parent_id, "user_id": user_id, "student_id": student_id}
 
     except Exception as ex:
         message = f"register_parent: {str(ex)}"
+        conn.rollback()
 
     return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
 

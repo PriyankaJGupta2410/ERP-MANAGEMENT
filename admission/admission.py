@@ -13,6 +13,8 @@ import base64
 import logging
 from werkzeug.exceptions import BadRequest
 import json
+import re
+from model.model import GETuserdetails
 
 
 load_dotenv()
@@ -29,18 +31,19 @@ def POSTadmission(current_user_id=None):
     res_data = {}
 
     try:
-        print("1")
-        metadata = request.form.get("data")
-        data = json.loads(metadata) if metadata else {}
-
-        student_photo = request.files.get("photo")
-        student_signature = request.files.get("signature")
+        data = request.json
 
         admission_id = str(uuid.uuid4())
         created_date = datetime.now()
 
-        photo_data = student_photo.read() if student_photo else None
-        signature_data = student_signature.read() if student_signature else None
+
+        def extract_base64(encoded):
+            if not encoded:
+                return None
+            return base64.b64decode(re.sub('^data:image/.+;base64,', '', encoded))
+
+        photo_data = extract_base64(data.get("photo_base64"))
+        signature_data = extract_base64(data.get("signature_base64"))
 
         query = """
             INSERT INTO admission_master (
@@ -59,7 +62,7 @@ def POSTadmission(current_user_id=None):
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, 
             )
         """
 
@@ -83,9 +86,6 @@ def POSTadmission(current_user_id=None):
             data.get("permanent_address"), current_user_id, created_date
         )
 
-        print(f"Number of placeholders: {query.count('%s')}")
-        print(f"Number of values: {len(values)}")
-
         db.execute(query, values)
         conn.commit()
 
@@ -93,7 +93,9 @@ def POSTadmission(current_user_id=None):
         code = 200
         message = "Admission submitted successfully"
         res_data = {
-            "admission_id": admission_id
+            "admission_id": admission_id,
+            "photo_base64": data.get("photo_base64"),
+            "signature_base64": data.get("signature_base64")
         }
 
     except Exception as ex:
@@ -116,9 +118,9 @@ def GETAlladmission(current_user_id=None):
     res_data = []
 
     try:
+        # Check if user exists
         db.execute("SELECT _id FROM user_master WHERE _id = %s", (current_user_id,))
         user = db.fetchone()
-
         if not user:
             message = "Unauthorized user"
             code = 403
@@ -128,9 +130,8 @@ def GETAlladmission(current_user_id=None):
                 "message": message,
                 "res_data": res_data
             })
-        
 
-        # Fetch all admission fields
+        # Fetch all admissions (no school_id filter)
         db.execute("""
             SELECT 
                 admission_form_no,
@@ -186,28 +187,25 @@ def GETAlladmission(current_user_id=None):
             FROM admission_master
             ORDER BY created_date DESC
         """)
+
         rows = db.fetchall()
-        admission_list = [dict(row) for row in rows]
-        if admission_list:
-            for admission in admission_list:
-                # Convert binary data to base64 strings if present
-                if admission.get("photo_data"):
-                    admission["photo_data"] = base64.b64encode(admission["photo_data"]).decode('utf-8')
-                if admission.get("signature_data"):
-                    admission["signature_data"] = base64.b64encode(admission["signature_data"]).decode('utf-8')
-            
-            status = "success"
-            code = 200
-            message = "Admissions fetched successfully"
-            res_data = admission_list
-        else:
-            status = "success"
-            code = 404
-            message = "No admissions found"
-            res_data = []
+        admission_list = []
+        for row in rows:
+            admission = dict(row)
+            if admission.get("photo_data"):
+                admission["photo_data"] = base64.b64encode(admission["photo_data"]).decode('utf-8')
+            if admission.get("signature_data"):
+                admission["signature_data"] = base64.b64encode(admission["signature_data"]).decode('utf-8')
+            admission_list.append(admission)
+
+        status = "success"
+        code = 200
+        message = "Admissions fetched successfully" if admission_list else "No admissions found"
+        res_data = admission_list
 
     except Exception as ex:
         message = f"GETAlladmission Error: {str(ex)}"
+        code = 500
 
     return jsonify({
         "status": status,
@@ -215,4 +213,79 @@ def GETAlladmission(current_user_id=None):
         "message": message,
         "res_data": res_data
     })
+
+@admission_bp.route('/APPROVEadmission', methods=['POST'])
+@authentication
+def APPROVEadmission(current_user_id=None):
+    message = ""
+    code = 500
+    status = "fail"
+    res_data = {}
+
+    try:
+        data = request.json
+        admission_id = data.get("admission_id")
+        new_status = data.get("status")
+        reason = data.get("reason", "").strip()
+
+        if not admission_id or not new_status:
+            return jsonify({
+                "status": status,
+                "code": 400,
+                "message": "admission_id and status are required.",
+                "res_data": res_data
+            })
+
+        if new_status not in ["Approved", "Rejected"]:
+            return jsonify({
+                "status": status,
+                "code": 400,
+                "message": "Invalid status. Use 'Approved' or 'Rejected'.",
+                "res_data": res_data
+            })
+
+        if new_status == "Rejected" and not reason:
+            return jsonify({
+                "status": status,
+                "code": 400,
+                "message": "Rejection reason is required when status is 'Rejected'.",
+                "res_data": res_data
+            })
+
+        # Update query
+        update_query = """
+            UPDATE admission_master
+            SET status = %s,
+                rejection_reason = %s,
+                modified_date = NOW()
+            WHERE _id = %s
+        """
+        db.execute(update_query, (
+            new_status,
+            reason if new_status == "Rejected" else None,
+            admission_id
+        ))
+        conn.commit()
+
+        status = "success"
+        code = 200
+        message = f"Admission {new_status.lower()} successfully."
+        res_data = {
+            "admission_id": admission_id,
+            "status": new_status,
+            "rejection_reason": reason if new_status == "Rejected" else ""
+        }
+
+    except Exception as ex:
+        conn.rollback()
+        message = f"Error in APPROVEadmission: {str(ex)}"
+
+    return jsonify({
+        "status": status,
+        "code": code,
+        "message": message,
+        "res_data": res_data
+    })
+
+
 

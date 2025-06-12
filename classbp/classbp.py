@@ -227,3 +227,4 @@ def TOGGLEclassStatus(current_user_id=None):
         "message": message,
         "res_data": res_data
     })
+

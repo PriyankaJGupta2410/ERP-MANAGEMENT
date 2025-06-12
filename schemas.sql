@@ -212,24 +212,6 @@ CREATE TABLE Subject_Assigned_Master (
 );
 
 
-
-
--- CREATE TABLE school_master (
---     _id CHAR(36) PRIMARY KEY,
---     superadmin_id CHAR(36) NOT NULL,
---     about_us TEXT NOT NULL,
---     infrastructure TEXT NOT NULL,
---     latest_news TEXT NOT NULL,
---     gallery TEXT NOT NULL,
---     contact_us TEXT NOT NULL,
---     created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---     modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
---     FOREIGN KEY (superadmin_id) REFERENCES user_master(_id)
---         ON DELETE CASCADE
---         ON UPDATE CASCADE
--- );
-
 CREATE TABLE school_master (
     _id VARCHAR(36) PRIMARY KEY,                -- UUID for school ID
     superadmin_id VARCHAR(36) NOT NULL,         -- Foreign key to user_master._id (Superadmin)
@@ -280,5 +262,107 @@ CREATE TABLE StockTransaction (
     remarks TEXT,
     FOREIGN KEY (item_id) REFERENCES Item(_id)
 );
+
+CREATE TABLE books_master (
+    _id CHAR(36) PRIMARY KEY,
+    name VARCHAR(255),
+    quantity INT,
+    barcode VARCHAR(100),
+    author VARCHAR(255),
+    price DECIMAL(10,2),
+    publication VARCHAR(255),
+    total_price DECIMAL(10,2),
+    created_by VARCHAR(100),
+    created_date DATETIME
+);
+
+CREATE TABLE issued_books (
+    _id CHAR(36) PRIMARY KEY,
+    book_id CHAR(36),
+    user_id CHAR(36),
+    issue_date DATE,
+    return_date DATE,
+    fine_per_day DECIMAL(10,2),
+    created_by CHAR(36),
+    created_date DATETIME
+);
+
+CREATE TABLE transactions_master (
+    _id CHAR(36) PRIMARY KEY,
+    book_id CHAR(36),
+    user_id CHAR(36),
+    action VARCHAR(50), -- 'issued', 'returned', etc.
+    action_date DATE,
+    created_by CHAR(36),
+    created_date DATETIME
+);
+
+CREATE TABLE newsmagzine (
+    _id VARCHAR(50) PRIMARY KEY,
+    type VARCHAR(50) NOT NULL,          -- Newspaper or Magazine
+    name VARCHAR(100) NOT NULL,         -- Name of the publication
+    dates DATE NOT NULL,                -- Date of issue or record
+    frequency VARCHAR(50) NOT NULL,     -- Daily, Weekly, Monthly etc.
+    quantity INT NOT NULL,              -- Number of copies
+    price DECIMAL(10, 2) NOT NULL,      -- Price per copy
+    total DECIMAL(12, 2) NOT NULL       -- Total cost (quantity * price)
+);
+
+
+CREATE TABLE syllabus_master (
+    _id VARCHAR(36) PRIMARY KEY,                -- UUID for syllabus
+    class VARCHAR(50) NOT NULL,                 -- Class name (e.g., "10th")
+    subject_syllabus LONGBLOB NOT NULL,         -- Uploaded syllabus file as BLOB
+    uploaded_by VARCHAR(36) NOT NULL,           -- Same as user_id or admin ID
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP -- Auto timestamp
+);
+
+CREATE TABLE schedule_master (
+    _id VARCHAR(36) PRIMARY KEY,           -- Unique ID for the schedule (UUID)
+    uploaded_by VARCHAR(36) NOT NULL,      -- ID of the user uploading the schedule
+    day_of_week VARCHAR(20) NOT NULL,      -- Day like Monday, Tuesday, etc.
+    subject VARCHAR(100) NOT NULL,         -- Subject name
+    time_slot VARCHAR(50) NOT NULL,        -- Time slot (e.g., 10:00-11:00)
+    schedule_file LONGBLOB NOT NULL,       -- Binary file data for schedule
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP  -- Upload time
+);
+
+CREATE TABLE notice_master (
+    _id SERIAL PRIMARY KEY,
+    notice_text TEXT NOT NULL,
+    uploaded_by VARCHAR(36) NOT NULL,
+    notice_file BLOB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE attendance_master (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    status ENUM('Present', 'Absent') NOT NULL,
+    uploaded_by VARCHAR(36) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE leave_master (
+    _id VARCHAR(100) PRIMARY KEY,
+    from_date DATE NOT NULL,   ####YYYY-MM-DD####
+    to_date DATE NOT NULL,     ####YYYY-MM-DD####
+    leave_type VARCHAR(50), -- Optional if needed
+    coverage_partner VARCHAR(100), -- Added as requested
+    reason TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE timetable_master (
+    _id INT AUTO_INCREMENT PRIMARY KEY,
+    class VARCHAR(100) NOT NULL,
+    day_of_week VARCHAR(20) NOT NULL,       -- e.g., Monday, Tuesday
+    subject VARCHAR(100) NOT NULL,
+    time_slot VARCHAR(50) NOT NULL,         -- e.g., 09:00 AM - 10:00 AM
+    teacher_id VARCHAR(100),                -- to track who updated it
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
 
 

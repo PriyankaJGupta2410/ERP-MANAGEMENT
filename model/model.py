@@ -74,6 +74,7 @@ def upload_file(current_user_id=None):
         "res_data": res_data
     })
 
+
 def GETuserdetails(current_user_id=None):
     message = ""
     status = "fail"

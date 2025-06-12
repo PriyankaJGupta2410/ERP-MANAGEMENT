@@ -33,14 +33,10 @@ def GETschooldetails(current_user_id=None):
             if school:
                 gallery_data = school.get("gallery")
                 if isinstance(gallery_data, bytes):
-                    # Encode bytes to base64 string
                     gallery_data = base64.b64encode(gallery_data).decode('utf-8')
-
-                # Optional: try parsing gallery as JSON if expected
                 try:
                     gallery_data = json.loads(gallery_data)
                 except Exception:
-                    # If not JSON, keep as string
                     pass
                 res_data = {
                     "_id": school.get("_id"),

@@ -45,10 +45,12 @@ CREATE TABLE admission_master (
     percentage DECIMAL(5,2),
     photo_data LONGBLOB,
     signature_data LONGBLOB,
+    status VARCHAR(20) DEFAULT 'Pending',
     current_address TEXT,
     permanent_address TEXT,
     created_by VARCHAR(36),
     created_date DATETIME DEFAULT CURRENT_TIMESTAMP
+
 ) AUTO_INCREMENT = 1000;
 
 
@@ -135,7 +137,37 @@ CREATE TABLE student_master (
         ON DELETE SET NULL ON UPDATE CASCADE
 );
 
+CREATE TABLE role_master (
+    _id CHAR(36) PRIMARY KEY,
+    role_name VARCHAR(50) UNIQUE NOT NULL,     -- e.g., 'teacher', 'admin'
+    role VARCHAR(100) NOT NULL,                -- Display name, e.g., 'Teacher', 'Admin'
+    description TEXT,                          -- Optional role description
+    type VARCHAR(20) NOT NULL,                 -- 'teaching' or 'non-teaching'
+    status VARCHAR(20) DEFAULT 'active',       -- 'active' or 'inactive'
+    user_id CHAR(36),                          -- Created by user (foreign key to user_master)
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
+CREATE TABLE file_uploads (
+    _id CHAR(36) PRIMARY KEY,  -- UUID
+    file_name VARCHAR(255),
+    file_type VARCHAR(100),
+    file_data LONGBLOB,           -- To store binary file data
+    uploaded_by CHAR(36),      -- Foreign key to users table (optional, depends on your schema)
+    created_date DATETIME
+);
+
+CREATE TABLE subject_master (
+    _id VARCHAR(36) PRIMARY KEY,
+    subject_name VARCHAR(100) NOT NULL,
+    subject_code VARCHAR(50) NOT NULL,
+    description TEXT,
+    class_id VARCHAR(36) NOT NULL,
+    created_by VARCHAR(36),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modified_date DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 
 
 
@@ -154,6 +186,32 @@ CREATE TABLE staff_master (
     FOREIGN KEY (created_by) REFERENCES user_master(_id),
     FOREIGN KEY (school_id) REFERENCES school_master(_id)
 );
+
+CREATE TABLE class_teacher_master (
+    _id VARCHAR(50) PRIMARY KEY,
+    class_id VARCHAR(50) NOT NULL,
+    teacher_id VARCHAR(50) NOT NULL,
+    created_by VARCHAR(50),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    modified_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (class_id) REFERENCES class_master(_id),
+    FOREIGN KEY (teacher_id) REFERENCES staff_master(_id),
+    FOREIGN KEY (created_by) REFERENCES user_master(_id)
+);
+CREATE TABLE Subject_Assigned_Master (
+    _id VARCHAR(50) PRIMARY KEY,
+    teacher_id VARCHAR(50) NOT NULL,
+    class_id VARCHAR(50) NOT NULL,
+    subject_id VARCHAR(50) NOT NULL,
+    created_by VARCHAR(50),
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES staff_master(_id),
+    FOREIGN KEY (class_id) REFERENCES class_master(_id),
+    FOREIGN KEY (subject_id) REFERENCES subject_master(_id),
+    FOREIGN KEY (created_by) REFERENCES user_master(_id)
+);
+
+
 
 
 -- CREATE TABLE school_master (

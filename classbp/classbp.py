@@ -108,7 +108,7 @@ def UPDATEclass(current_user_id=None):
 
     try:
         data = request.json
-        class_id = data.get("_id")  # class primary key
+        class_id = data.get("_id") 
         class_name = data.get("class_name")
         section = data.get("section")
         academic_year = data.get("academic_year")

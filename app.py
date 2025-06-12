@@ -11,7 +11,11 @@ from staff.staff import staff_bp
 from school.school import school_bp
 from fee.fee import fee_bp
 from classbp.classbp import class_bp
-from store.store import store_bp  # Import Sam store  
+from store.store import store_bp 
+from role.role import role_bp
+from model.model import model_bp
+from teacher.teacher import teacher_bp
+from subject.subject import subject_bp
 #############################################
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
@@ -23,7 +27,11 @@ app.register_blueprint(staff_bp,url_prefix = '/staff')
 app.register_blueprint(school_bp,url_prefix = '/school')
 app.register_blueprint(fee_bp,url_prefix="/fee")
 app.register_blueprint(class_bp,url_prefix="/class")
-app.register_blueprint(store_bp, url_prefix="/store")  # Register store blueprint
+app.register_blueprint(store_bp, url_prefix="/store") 
+app.register_blueprint(role_bp, url_prefix="/role")
+app.register_blueprint(model_bp, url_prefix="/model")
+app.register_blueprint(teacher_bp, url_prefix="/teacher")
+app.register_blueprint(subject_bp, url_prefix="/subject")
 ####################################################################
 
 @app.route("/")

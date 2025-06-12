@@ -12,6 +12,7 @@ from email.mime.text import MIMEText
 import random
 import uuid
 from werkzeug.utils import secure_filename
+import base64
 
 
 load_dotenv()
@@ -384,6 +385,7 @@ def RegisterSchool():
     return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
 
 ####################### Student Registration API #############################
+
 @auth_bp.route('/register_student', methods=['POST'])
 @authentication
 def register_student(current_user_id=None):
@@ -403,25 +405,34 @@ def register_student(current_user_id=None):
         contact = data.get("contact")
         username = data.get("username")
         password = data.get("password")
+        profile_image = data.get("profile_image") 
 
         if not all([admission_id, class_id, roll_number, academic_year, email, contact, username, password]):
             message = "All fields are required"
             code = 400
             return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
+
+        # Generate IDs
         user_id = str(uuid.uuid4())
         hashed_password = generate_password_hash(password)
 
+        # Decode base64 image to binary
+        profile_image_data = base64.b64decode(profile_image) if profile_image else None
+
+        # Get school_id from current_user_id
         db.execute("SELECT school_id FROM user_master WHERE _id = %s", (current_user_id,))
         school_row = db.fetchone()
         school_id = school_row.get("school_id") if school_row else None
 
+        # Insert into user_master
         db.execute("""
             INSERT INTO user_master (
                 _id, username, email, contact, password, role, school_id,
                 profile_image, status, created_date, login_date, modified_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NULL, 'Active', NOW(), NOW(), NOW())
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Active', NOW(), NOW(), NOW())
         """, (
-            user_id, username, email, contact, hashed_password, "student", school_id
+            user_id, username, email, contact, hashed_password, "student",
+            school_id, profile_image_data
         ))
 
         # Insert into student_master
@@ -446,6 +457,7 @@ def register_student(current_user_id=None):
         message = f"register_student: {str(ex)}"
 
     return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
+
 #################### Parent Registration API #############################
 @auth_bp.route('/register_parent', methods=['POST'])
 @authentication
@@ -465,16 +477,24 @@ def register_parent(current_user_id=None):
         email = data.get("email")
         contact = data.get("contact")
         username = data.get("username")
-        password = data.get("password") 
+        password = data.get("password")
+        profile_image = data.get("profile_image")  # Base64 image string (optional)
 
-        if not all([parent_id, occupation, relation, address, email, contact, username, password]):
+        if not all([occupation, relation, address, email, contact, username, password]):
             message = "All fields are required"
             code = 400
-            return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
-        
+            return jsonify({
+                "status": status, "code": code,
+                "message": message, "res_data": res_data
+            })
+
         user_id = str(uuid.uuid4())
         hashed_password = generate_password_hash(password)
 
+        # Decode base64 image (if provided)
+        profile_image_data = base64.b64decode(profile_image) if profile_image else None
+
+        # Get school_id
         db.execute("SELECT school_id FROM user_master WHERE _id = %s", (current_user_id,))
         school_row = db.fetchone()
         school_id = school_row.get("school_id") if school_row else None
@@ -484,9 +504,10 @@ def register_parent(current_user_id=None):
             INSERT INTO user_master (
                 _id, username, email, contact, password, role, school_id,
                 profile_image, status, created_date, login_date, modified_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, NULL, 'Active', NOW(), NOW(), NOW())
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Active', NOW(), NOW(), NOW())
         """, (
-            user_id, username, email, contact, hashed_password, "parent", school_id
+            user_id, username, email, contact, hashed_password,
+            "parent", school_id, profile_image_data
         ))
 
         # Insert into parent_master
@@ -496,7 +517,8 @@ def register_parent(current_user_id=None):
                 is_active, created_by, created_date
             ) VALUES (%s, %s, %s, %s, %s, %s, TRUE, %s, NOW())
         """, (
-            parent_id, user_id, student_id, occupation, relation, address, current_user_id
+            parent_id, user_id, student_id, occupation, relation,
+            address, current_user_id
         ))
 
         conn.commit()
@@ -504,14 +526,22 @@ def register_parent(current_user_id=None):
         status = "success"
         code = 201
         message = "Parent registered successfully"
-        res_data = {"parent_id": parent_id, "user_id": user_id, "student_id": student_id}
+        res_data = {
+            "parent_id": parent_id,
+            "user_id": user_id,
+            "student_id": student_id
+        }
 
     except Exception as ex:
         message = f"register_parent: {str(ex)}"
         conn.rollback()
 
-    return jsonify({"status": status, "code": code, "message": message, "res_data": res_data})
-
+    return jsonify({
+        "status": status,
+        "code": code,
+        "message": message,
+        "res_data": res_data
+    })
 
 
 

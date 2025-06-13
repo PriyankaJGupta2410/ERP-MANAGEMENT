@@ -69,29 +69,21 @@ def VerifyOtp():
 def success():
     return render_template('success.html')
 
-@app.route('/registerSuperadmin')
-def registerSuperadmin():
-    return render_template('register_superadmin.html')
-
-@app.route('/registerSchool')
-def registerSchool():
-    return render_template('registerschool.html')
-
-@app.route('/addSupervisor')
+@app.route('/addViceprincipal')
 def addSupervisor():
-    return render_template('add_supervisor.html')
+    return render_template('add_viceprincipal.html')
 
 @app.route('/Getstaff')
 def Getstaff():
     return render_template('get_staff.html')
 
-@app.route('/Superadmindashboard')
+@app.route('/Principaldashboard')
 def Superadmindashboard():
-    return render_template('superadmin_dashboard.html')
+    return render_template('principal_dashboard.html')
 
-@app.route('/Supervisordashboard')
+@app.route('/Viceprincipaldashboard')
 def Supervisordashboard():
-    return render_template('supervisor_dashboard.html')
+    return render_template('Viceprincipal_dashboard.html')
 
 @app.route('/addStaff')
 def addStaff():

@@ -213,8 +213,8 @@ CREATE TABLE Subject_Assigned_Master (
 
 
 CREATE TABLE school_master (
-    _id VARCHAR(36) PRIMARY KEY,                -- UUID for school ID
-    superadmin_id VARCHAR(36) NOT NULL,         -- Foreign key to user_master._id (Superadmin)
+    _id CHAR(36) PRIMARY KEY,                -- UUID for school ID
+    principal_id CHAR(36) NOT NULL,         -- Foreign key to user_master._id (Superadmin)
     school_name VARCHAR(255) NOT NULL,
     principal_name VARCHAR(255) NOT NULL,
     contact_email VARCHAR(255) NOT NULL,
@@ -229,7 +229,7 @@ CREATE TABLE school_master (
     contact_us TEXT NOT NULL,
     created_date DATETIME NOT NULL,
 
-    CONSTRAINT fk_superadmin FOREIGN KEY (superadmin_id) REFERENCES user_master(_id)
+    CONSTRAINT fk_principal FOREIGN KEY (principal_id) REFERENCES user_master(_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 

@@ -504,10 +504,10 @@ def newspaper(current_user_id=None):
 
             total = int(price) * int(quantity)
 
-            db.execute("""INSERT INTO newsmagzine 
-                (_id, type, name, dates, frequency, quantity, price, total) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-                (newspaper_id, newspaper_type, name, date, frequency, quantity, price, total))
+            db.execute("""
+                INSERT INTO newsmagzine (_id, type, name, dates, frequency, quantity, price, total)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (newspaper_id, newspaper_type, name, date, frequency, quantity, price, total))
             conn.commit()
 
             status = "success"
@@ -518,10 +518,12 @@ def newspaper(current_user_id=None):
                 "type": newspaper_type,
                 "name": name,
                 "date": date,
+                "quantity": quantity,
+                "price": price,
                 "total": total
             }
 
-        else:
+        elif request.method == "GET":
             from_date = request.args.get('from_date')
             to_date = request.args.get('to_date')
             download_pdf = request.args.get('download_pdf')
@@ -565,6 +567,7 @@ def newspaper(current_user_id=None):
                 pdf_bytes = pdf.output(dest='S').encode('latin1')
                 pdf_output.write(pdf_bytes)
                 pdf_output.seek(0)
+
                 return send_file(
                     pdf_output,
                     as_attachment=True,

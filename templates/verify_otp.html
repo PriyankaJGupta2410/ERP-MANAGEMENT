@@ -107,8 +107,8 @@
 
         // Delay before redirect
         setTimeout(() => {
-          if (role && role.toLowerCase() === 'superadmin') {
-            window.location.href = '/Superadmindashboard';
+          if (role && role.toLowerCase() === 'principal') {
+            window.location.href = '/Principaldashboard';
           } else if (role && role.toLowerCase() === 'supervisor') {
             window.location.href = '/Supervisordashboard';
           } else if (role && role.toLowerCase() === 'accountant') {

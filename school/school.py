@@ -32,21 +32,29 @@ def GETschooldetails(current_user_id=None):
 
             if school:
                 gallery_data = school.get("gallery")
-                if isinstance(gallery_data, bytes):
-                    gallery_data = base64.b64encode(gallery_data).decode('utf-8')
-                try:
-                    gallery_data = json.loads(gallery_data)
-                except Exception:
-                    pass
+                if gallery_data:
+                    gallery_base64 = base64.b64encode(gallery_data).decode("utf-8")
+                else:
+                    gallery_base64 = ""
+
+                # print("Gallery Data:", gallery_data)
                 res_data = {
                     "_id": school.get("_id"),
                     "about_us": school.get("about_us"),
                     "infrastructure": school.get("infrastructure"),
                     "latest_news": school.get("latest_news"),
-                    "gallery": gallery_data,
+                    "gallery": gallery_base64,
                     "contact_us": school.get("contact_us"),
-                    "created_date": str(school.get("created_date")),
-                    "superadmin_id": school.get("superadmin_id")
+                    "school_name": school.get("school_name"),
+                    "vision": school.get("vision"),
+                    "mission": school.get("mission"),
+                    "latest_news": school.get("latest_news"),
+                    "contact_us": school.get("contact_us"),
+                    "principal_name": school.get("principal_name"),
+                    "contact_email": school.get("contact_email"),
+                    "contact_phone": school.get("contact_phone"),
+                    "principal_id" : school.get("principal_id")
+
                 }
                 message = "School details fetched successfully."
                 status = "success"

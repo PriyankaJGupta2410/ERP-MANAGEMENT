@@ -1,0 +1,143 @@
+<!-- transactions.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>All Transactions</h2>
+
+<form id="filterForm" style="margin-bottom: 20px;">
+    <label>From Date:</label>
+    <input type="date" name="from_date" id="from_date">
+    <label>To Date:</label>
+    <input type="date" name="to_date" id="to_date">
+    <button type="submit">Filter Transactions</button>
+    <button type="button" onclick="clearFilters()">Clear Filters</button>
+</form>
+
+<div style="margin-bottom: 10px;">
+    <button onclick="downloadPDF()" id="downloadBtn" disabled>Download PDF</button>
+    <span id="transactionCount"></span>
+</div>
+
+<table border="1" cellpadding="10" cellspacing="0" id="transactionsTable">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Item</th>
+            <th>User</th>
+            <th>Quantity</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+    <tbody id="transactionsBody">
+    </tbody>
+</table>
+
+<script>
+let currentTransactions = [];
+
+function loadTransactions(fromDate = null, toDate = null) {
+    const data = {};
+    if (fromDate) data.from_date = fromDate;
+    if (toDate) data.to_date = toDate;
+    
+    fetch('/get_transactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            currentTransactions = result.res_data;
+            displayTransactions(result.res_data);
+            document.getElementById('downloadBtn').disabled = result.res_data.length === 0;
+        } else {
+            alert('Error loading transactions: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function displayTransactions(transactions) {
+    const tableBody = document.getElementById('transactionsBody');
+    const countSpan = document.getElementById('transactionCount');
+    
+    countSpan.textContent = `Total Transactions: ${transactions.length}`;
+    
+    if (transactions && transactions.length > 0) {
+        let tableHtml = '';
+        transactions.forEach(tx => {
+            const typeClass = tx.transaction_type === 'ISSUE' ? 'issue-row' : 'return-row';
+            tableHtml += `
+                <tr class="${typeClass}">
+                    <td>${tx.transaction_date}</td>
+                    <td>${tx.transaction_type}</td>
+                    <td>${tx.item_name}</td>
+                    <td>${tx.user_name || 'N/A'}</td>
+                    <td>${tx.quantity}</td>
+                    <td>${tx.remarks || 'N/A'}</td>
+                </tr>
+            `;
+        });
+        tableBody.innerHTML = tableHtml;
+    } else {
+        tableBody.innerHTML = '<tr><td colspan="6">No transactions found</td></tr>';
+    }
+}
+
+function clearFilters() {
+    document.getElementById('from_date').value = '';
+    document.getElementById('to_date').value = '';
+    loadTransactions();
+}
+
+function downloadPDF() {
+    if (currentTransactions.length === 0) {
+        alert('No transactions to download');
+        return;
+    }
+    
+    const fromDate = document.getElementById('from_date').value;
+    const toDate = document.getElementById('to_date').value;
+    
+    // Create form for PDF download
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/download_transactions_pdf';
+    
+    if (fromDate) {
+        const fromInput = document.createElement('input');
+        fromInput.type = 'hidden';
+        fromInput.name = 'from_date';
+        fromInput.value = fromDate;
+        form.appendChild(fromInput);
+    }
+    
+    if (toDate) {
+        const toInput = document.createElement('input');
+        toInput.type = 'hidden';
+        toInput.name = 'to_date';
+        toInput.value = toDate;
+        form.appendChild(toInput);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+document.getElementById('filterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fromDate = document.getElementById('from_date').value;
+    const toDate = document.getElementById('to_date').value;
+    loadTransactions(fromDate, toDate);
+});
+
+// Load transactions on page load
+document.addEventListener('DOMContentLoaded', () => loadTransactions());
+</script>
+{% endblock %}

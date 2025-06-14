@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Principal Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #34495e;
+      color: #ecf0f1;
+      padding: 20px 30px;
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .dashboard-container {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    nav.sidebar {
+      width: 220px;
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding-top: 30px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    nav.sidebar ul {
+      list-style: none;
+      width: 100%;
+      padding-left: 0;
+    }
+
+    nav.sidebar ul li {
+      padding: 14px 25px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 16px;
+      font-weight: 600;
+      border-left: 4px solid transparent;
+    }
+
+    nav.sidebar ul li:hover {
+      background-color: #3d566e;
+      border-left: 4px solid #3498db;
+    }
+
+    main.content {
+      flex-grow: 1;
+      background: white;
+      margin: 30px;
+      border-radius: 10px;
+      padding: 30px 40px;
+      overflow-y: auto;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    main.content h2 {
+      margin-bottom: 25px;
+      color: #34495e;
+    }
+
+    .info-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+    }
+
+    .info-item {
+      flex: 1 1 45%;
+      min-width: 280px;
+      margin-bottom: 20px;
+    }
+
+    .info-item strong {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #2c3e50;
+    }
+
+    .info-item span {
+      font-size: 15px;
+      color: #555;
+      word-wrap: break-word;
+    }
+
+    .gallery-container {
+      margin-top: 30px;
+    }
+
+    .gallery-container strong {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .gallery-container img {
+      max-width: 300px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .button-group {
+      margin-top: 40px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 14px 40px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    #addSupervisorBtn {
+      background-color: #3498db;
+    }
+
+    #addSupervisorBtn:hover {
+      background-color: #2980b9;
+    }
+
+    #logoutBtn {
+      background-color: #e74c3c;
+    }
+
+    #logoutBtn:hover {
+      background-color: #c0392b;
+    }
+
+    #response {
+      text-align: center;
+      margin-top: 20px;
+      color: #e74c3c;
+      font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-container {
+        flex-direction: column;
+      }
+
+      nav.sidebar {
+        width: 100%;
+        padding: 15px 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      nav.sidebar ul {
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+        width: auto;
+      }
+
+      nav.sidebar ul li {
+        border-left: none;
+        padding: 10px 12px;
+      }
+
+      main.content {
+        margin: 15px 15px 30px;
+        padding: 20px;
+      }
+
+      .info-item {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>Principal Dashboard</header>
+
+<div class="dashboard-container">
+
+  <nav class="sidebar">
+    <ul>
+      <li onclick="navigateTo('/Principaldashboard')">School Details</li>
+      <li onclick="navigateTo('/Viceprincipaldashboard')">Supervisors</li>
+    </ul>
+  </nav>
+
+  <main class="content">
+    <h2>School Information</h2>
+    <div class="info-group">
+      <div class="info-item"><strong>School Name:</strong> <span id="school_name">-</span></div>
+      <div class="info-item"><strong>Principal Name:</strong> <span id="principal_name">-</span></div>
+      <div class="info-item"><strong>Email:</strong> <span id="contact_email">-</span></div>
+      <div class="info-item"><strong>Phone:</strong> <span id="contact_phone">-</span></div>
+      <div class="info-item"><strong>Vision:</strong> <span id="vision">-</span></div>
+      <div class="info-item"><strong>Mission:</strong> <span id="mission">-</span></div>
+      <div class="info-item" style="flex-basis: 100%;"><strong>About Us:</strong> <span id="about_us">-</span></div>
+      <div class="info-item" style="flex-basis: 100%;"><strong>Infrastructure:</strong> <span id="infrastructure">-</span></div>
+      <div class="info-item" style="flex-basis: 100%;"><strong>Latest News:</strong> <span id="latest_news">-</span></div>
+      <div class="info-item" style="flex-basis: 100%;"><strong>Contact Us:</strong> <span id="contact_us">-</span></div>
+    </div>
+
+    <div class="gallery-container">
+      <strong>Gallery:</strong>
+      <div id="gallery">-</div>
+    </div>
+
+    <div class="button-group">
+      <button id="addSupervisorBtn" onclick="location.href='/addViceprincipal'">Add Vice Principal</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
+
+    <p id="response"></p>
+  </main>
+</div>
+
+<script>
+  function navigateTo(section) {
+    alert("Navigate to: " + section);
+  }
+
+  async function fetchSchoolDetails() {
+    const responseElem = document.getElementById("response");
+    responseElem.innerText = "";
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        responseElem.innerText = "Authentication token missing.";
+        return;
+      }
+
+      const res = await fetch("http://127.0.0.1:5000/school/GETschooldetails", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token
+        }
+      });
+
+      const result = await res.json();
+
+      if (result.status === "success" && result.res_data && typeof result.res_data === "object") {
+        const school = result.res_data;
+
+        document.getElementById("school_name").innerText = school.school_name || "-";
+        document.getElementById("principal_name").innerText = school.principal_name || "-";
+        document.getElementById("contact_email").innerText = school.contact_email || "-";
+        document.getElementById("contact_phone").innerText = school.contact_phone || "-";
+        document.getElementById("vision").innerText = school.vision || "-";
+        document.getElementById("mission").innerText = school.mission || "-";
+        document.getElementById("about_us").innerText = school.about_us || "-";
+        document.getElementById("infrastructure").innerText = school.infrastructure || "-";
+        document.getElementById("latest_news").innerText = school.latest_news || "-";
+        document.getElementById("contact_us").innerText = school.contact_us || "-";
+
+        const galleryContainer = document.getElementById("gallery");
+        if (school.gallery && typeof school.gallery === 'string') {
+          galleryContainer.innerHTML = `<img src="data:image/jpeg;base64,${school.gallery}" alt="School Gallery" />`;
+        } else {
+          galleryContainer.innerText = "-";
+        }
+
+      } else {
+        responseElem.innerText = result.message || "No school data found.";
+      }
+    } catch (error) {
+      responseElem.innerText = "Error: " + error.message;
+    }
+  }
+
+  async function handleLogout() {
+    const responseElem = document.getElementById("response");
+    responseElem.innerText = "";
+
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://127.0.0.1:5000/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token
+        }
+      });
+
+      const result = await res.json();
+
+      if (result.status === "success") {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      } else {
+        responseElem.innerText = result.message || "Logout failed.";
+      }
+    } catch (error) {
+      responseElem.innerText = "Error during logout: " + error.message;
+    }
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+
+  fetchSchoolDetails();
+</script>
+
+</body>
+</html>

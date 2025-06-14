@@ -1,0 +1,105 @@
+<!-- issued_items.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Currently Issued Non-Consumable Items</h2>
+
+<table border="1" cellpadding="10" cellspacing="0" id="issuedItemsTable">
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Issued To</th>
+            <th>Issue Date</th>
+            <th>Remaining Quantity</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="issuedItemsBody">
+    </tbody>
+</table>
+
+<script>
+function loadIssuedItems() {
+    fetch('/get_issued_items', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            displayIssuedItems(result.res_data);
+        } else {
+            alert('Error loading issued items: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function displayIssuedItems(items) {
+    const tableBody = document.getElementById('issuedItemsBody');
+    
+    if (items && items.length > 0) {
+        let tableHtml = '';
+        items.forEach(item => {
+            tableHtml += `
+                <tr>
+                    <td>${item.item_name}</td>
+                    <td>${item.user_name}</td>
+                    <td>${item.transaction_date}</td>
+                    <td>${item.quantity}</td>
+                    <td>
+                        <button onclick="quickReturn('${item.item_id}', '${item.issued_to}', ${item.quantity})">
+                            Quick Return
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        tableBody.innerHTML = tableHtml;
+    } else {
+        tableBody.innerHTML = '<tr><td colspan="5">No issued items found</td></tr>';
+    }
+}
+
+function quickReturn(itemId, issuedTo, maxQuantity) {
+    const quantity = prompt(`Enter quantity to return (Max: ${maxQuantity}):`);
+    if (quantity && parseInt(quantity) > 0 && parseInt(quantity) <= maxQuantity) {
+        const returnDate = new Date().toISOString().split('T')[0];
+        
+        const data = {
+            item_id: itemId,
+            returned_by: issuedTo,
+            quantity: parseInt(quantity),
+            return_date: returnDate,
+            remarks: 'Quick return from issued items view'
+        };
+        
+        fetch('/return_item', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                alert('Item returned successfully!');
+                loadIssuedItems(); // Refresh the list
+            } else {
+                alert('Error: ' + result.message);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+        });
+    }
+}
+
+// Load issued items on page load
+document.addEventListener('DOMContentLoaded', loadIssuedItems);
+</script>
+{% endblock %}

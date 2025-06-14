@@ -1,0 +1,66 @@
+<!-- add_item.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Add New Item</h2>
+<form method="POST" id="addItemForm">
+    <label>Item Name:</label>
+    <input type="text" name="name" required>
+    
+    <label>Category:</label>
+    <select name="category_id" required>
+        {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+    
+    <label>Quantity:</label>
+    <input type="number" name="quantity" min="0" required>
+    
+    <label>Unit:</label>
+    <input type="text" name="unit" placeholder="e.g., pieces, kg, liters" required>
+
+    <label>Price Per Unit:</label>
+    <input type="number" name="price" step="0.01" min="0" required>
+
+    <label>Minimum Stock Alert Level:</label>
+    <input type="number" name="min_stock_alert" min="0" required>
+    
+    <label>Description:</label>
+    <textarea name="description" placeholder="Optional description"></textarea>
+    
+    <button type="submit">Add Item</button>
+</form>
+
+<script>
+document.getElementById('addItemForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {};
+    
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    fetch('/add_item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Item added successfully!');
+            this.reset();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+<!-- issue_item.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Issue Item</h2>
+<form method="POST" id="issueForm">
+    <label>Category:</label>
+    <select name="category" id="category" required>
+        {% for cat in categories %}
+            <option value="{{ cat.id }}">{{ cat.name }}</option>
+        {% endfor %}
+    </select>
+    
+    <label>Item:</label>
+    <select name="item_id" required>
+        {% for item in items %}
+            <option value="{{ item.item_id }}">{{ item.name }} (Available: {{ item.quantity }})</option>
+        {% endfor %}
+    </select>
+    
+    <label>Issued To:</label>
+    <select name="issued_to" required>
+        {% for user in users %}
+            <option value="{{ user._id }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+    
+    <label>Quantity:</label>
+    <input type="number" name="quantity" min="1" required>
+    
+    <label>Issue Date:</label>
+    <input type="date" name="issue_date" required>
+    
+    <div id="return_date_field" style="display: none;">
+        <label>Return Date (For Non-Consumable Items):</label>
+        <input type="date" name="return_date">
+    </div>
+    
+    <label>Remarks:</label>
+    <textarea name="remarks" placeholder="Optional remarks"></textarea>
+    
+    <button type="submit">Issue Item</button>
+</form>
+
+<script>
+document.getElementById('category').addEventListener('change', function() {
+    const returnDateField = document.getElementById('return_date_field');
+    if (this.value === '2') { // Non-consumable category
+        returnDateField.style.display = 'block';
+    } else {
+        returnDateField.style.display = 'none';
+    }
+});
+
+document.getElementById('issueForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {};
+    
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    fetch('/issue_item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Item issued successfully!');
+            this.reset();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+});
+</script>
+{% endblock %}

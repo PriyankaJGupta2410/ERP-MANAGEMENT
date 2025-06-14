@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Student Admission Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f9f9f9;
+        }
+        .section {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        #responseMessage {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Student Admission Form</h2>
+
+<form id="admissionForm" enctype="multipart/form-data">
+    <!-- Personal Info -->
+    <div class="section">
+        <h3>Personal Information</h3>
+        <label>First Name</label><input type="text" name="first_name" required />
+        <label>Middle Name</label><input type="text" name="middle_name" />
+        <label>Last Name</label><input type="text" name="last_name" required />
+        <label>Email</label><input type="email" name="email" required />
+        <label>Mobile Number</label><input type="text" name="mobile_number" required />
+        <label>Gender</label>
+        <select name="gender" required>
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+        <label>Religion</label><input type="text" name="religion" />
+        <label>DOB</label><input type="date" name="dob" required />
+        <label>Birth Place</label><input type="text" name="birth_place" />
+        <label>Nationality</label><input type="text" name="nationality" />
+        <label>Disability</label><input type="text" name="disability" />
+        <label>Domicile State</label><input type="text" name="domicile_state" />
+        <label>Aadhar No</label><input type="text" name="aadhar_no" />
+        <label>Mother Name</label><input type="text" name="mother_name" />
+        <label>Mother Tongue</label><input type="text" name="mother_tongue" />
+        <label>Locality</label><input type="text" name="locality" />
+        <label>Blood Group</label><input type="text" name="blood_group" />
+        <label>Guardian Mobile</label><input type="text" name="guardian_mobile" />
+        <label>Mother Mobile</label><input type="text" name="mother_mobile" />
+        <label>Earning Parent Income</label><input type="text" name="earning_parent_income" />
+        <label>Earning Parent PAN</label><input type="text" name="earning_parent_pan" />
+    </div>
+
+    <!-- Current Address -->
+    <div class="section">
+        <h3>Current Address</h3>
+        <label>Line 1</label><input type="text" name="current_line1" />
+        <label>City</label><input type="text" name="current_city" />
+        <label>State</label><input type="text" name="current_state" />
+        <label>Zip</label><input type="text" name="current_zip" />
+    </div>
+
+    <!-- Permanent Address -->
+    <div class="section">
+        <h3>Permanent Address</h3>
+        <label>Line 1</label><input type="text" name="permanent_line1" />
+        <label>City</label><input type="text" name="permanent_city" />
+        <label>State</label><input type="text" name="permanent_state" />
+        <label>Zip</label><input type="text" name="permanent_zip" />
+    </div>
+
+    <!-- Admission Info -->
+    <div class="section">
+        <h3>Admission Information</h3>
+        <label>Admission Category</label><input type="text" name="admission_category" />
+        <label>Caste Category</label><input type="text" name="caste_category" />
+        <label>Caste Subcaste</label><input type="text" name="caste_subcaste" />
+        <label>Caste Validity No</label><input type="text" name="caste_validity_no" />
+        <label>Eligibility No</label><input type="text" name="eligibility_no" />
+        <label>General Register No</label><input type="text" name="general_reg_no" />
+        <label>Course (Class Name)</label><input type="text" name="course" required />
+        <label>Academic Year (Section)</label><input type="text" name="academic_year" required />
+    </div>
+
+    <!-- Banking Info -->
+    <div class="section">
+        <h3>Banking Information</h3>
+        <label>Bank Name</label><input type="text" name="bank_name" />
+        <label>Branch</label><input type="text" name="branch" />
+        <label>Account Number</label><input type="text" name="account_no" />
+        <label>IFSC Code</label><input type="text" name="ifsc_code" />
+        <label>MICR Code</label><input type="text" name="micr_code" />
+    </div>
+
+    <!-- Academic Info -->
+    <div class="section">
+        <h3>Academic Information</h3>
+        <label>Last Institute Name</label><input type="text" name="last_institute_name" />
+        <label>UPISC Code</label><input type="text" name="upisc_code" />
+        <label>Migration Certificate No</label><input type="text" name="migration_cert_no" />
+        <label>LC/TC No</label><input type="text" name="lc_tc_no" />
+    </div>
+
+    <!-- Qualifying Exam -->
+    <div class="section">
+        <h3>Qualifying Examination</h3>
+        <label>Exam</label><input type="text" name="exam" />
+        <label>Exam Body</label><input type="text" name="exam_body" />
+        <label>Passing Month/Year</label><input type="text" name="passing_month_year" />
+        <label>Obtained Marks</label><input type="text" name="obtained_marks" />
+        <label>Out of Marks</label><input type="text" name="out_of_marks" />
+        <label>Percentage</label><input type="text" name="percentage" />
+    </div>
+
+    <!-- File Upload -->
+    <div class="section">
+        <h3>Documents Upload</h3>
+        <label>Photo</label><input type="file" name="photo" accept="image/*" required />
+        <label>Signature</label><input type="file" name="signature" accept="image/*" required />
+        <label>Other Documents (PDF)</label><input type="file" name="documents" multiple accept="application/pdf" />
+    </div>
+
+    <div class="section">
+        <h3>Fees Information</h3>
+        <label>Tuition Fee</label><input type="number" name="tuition_fee" required />
+        <label>Admission Fee</label><input type="number" name="admission_fee" required />
+        <label>Other Fees</label><input type="number" name="other_fees" required />
+        <label>Total Fees</label><input type="number" name="total_fees" readonly />
+    </div>
+
+    <button type="submit" class="submit-btn">Next</button>
+</form>
+
+<!-- Response message placeholder -->
+<div id="responseMessage"></div>
+
+<script>
+    // Auto update total fees field
+    document.addEventListener("DOMContentLoaded", function () {
+        const tuitionFeeInput = document.querySelector('input[name="tuition_fee"]');
+        const admissionFeeInput = document.querySelector('input[name="admission_fee"]');
+        const otherFeesInput = document.querySelector('input[name="other_fees"]');
+        const totalFeesInput = document.querySelector('input[name="total_fees"]');
+
+        function updateTotalFees() {
+            const tuition = parseFloat(tuitionFeeInput.value) || 0;
+            const admission = parseFloat(admissionFeeInput.value) || 0;
+            const other = parseFloat(otherFeesInput.value) || 0;
+            totalFeesInput.value = (tuition + admission + other).toFixed(2);
+        }
+
+        tuitionFeeInput.addEventListener("input", updateTotalFees);
+        admissionFeeInput.addEventListener("input", updateTotalFees);
+        otherFeesInput.addEventListener("input", updateTotalFees);
+    });
+
+    // Submit form handler
+    document.getElementById("admissionForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const responseDiv = document.getElementById("responseMessage");
+
+        // Prepare metadata object
+        const metadata = {
+            personal_info: {
+                first_name: form.first_name.value,
+                middle_name: form.middle_name.value,
+                last_name: form.last_name.value,
+                email: form.email.value,
+                mobile_number: form.mobile_number.value,
+                gender: form.gender.value,
+                religion: form.religion.value,
+                dob: form.dob.value,
+                birth_place: form.birth_place.value,
+                nationality: form.nationality.value,
+                disability: form.disability.value,
+                domicile_state: form.domicile_state.value,
+                aadhar_no: form.aadhar_no.value,
+                mother_name: form.mother_name.value,
+                mother_tongue: form.mother_tongue.value,
+                locality: form.locality.value,
+                blood_group: form.blood_group.value,
+                guardian_mobile: form.guardian_mobile.value,
+                mother_mobile: form.mother_mobile.value,
+                earning_parent_income: form.earning_parent_income.value,
+                earning_parent_pan: form.earning_parent_pan.value
+            },
+            current_address: {
+                line1: form.current_line1.value,
+                city: form.current_city.value,
+                state: form.current_state.value,
+                zip: form.current_zip.value
+            },
+            permanent_address: {
+                line1: form.permanent_line1.value,
+                city: form.permanent_city.value,
+                state: form.permanent_state.value,
+                zip: form.permanent_zip.value
+            },
+            admission_info: {
+                admission_category: form.admission_category.value,
+                caste_category: form.caste_category.value,
+                caste_subcaste: form.caste_subcaste.value,
+                caste_validity_no: form.caste_validity_no.value,
+                eligibility_no: form.eligibility_no.value,
+                general_reg_no: form.general_reg_no.value,
+                course: form.course.value,
+                academic_year: form.academic_year.value
+            },
+            banking_info: {
+                bank_name: form.bank_name.value,
+                branch: form.branch.value,
+                account_no: form.account_no.value,
+                ifsc_code: form.ifsc_code.value,
+                micr_code: form.micr_code.value
+            },
+            academic_info: {
+                last_institute_name: form.last_institute_name.value,
+                upisc_code: form.upisc_code.value,
+                migration_cert_no: form.migration_cert_no.value,
+                lc_tc_no: form.lc_tc_no.value
+            },
+            qualifying_exam: {
+                exam: form.exam.value,
+                exam_body: form.exam_body.value,
+                passing_month_year: form.passing_month_year.value,
+                obtained_marks: form.obtained_marks.value,
+                out_of_marks: form.out_of_marks.value,
+                percentage: form.percentage.value
+            },
+            fees_info: {
+                tuition_fee: form.tuition_fee.value,
+                admission_fee: form.admission_fee.value,
+                other_fees: form.other_fees.value,
+                total_fees: form.total_fees.value
+            }
+        };
+
+        const formData = new FormData();
+        formData.append("metadata", JSON.stringify(metadata));
+        formData.append("photo", form.photo.files[0]);
+        formData.append("signature", form.signature.files[0]);
+        for (const file of form.documents.files) {
+            formData.append("documents", file);
+        }
+
+        try {
+            const token = localStorage.getItem("token") || "";
+
+            const response = await fetch("/admissions/POSTadmission", {
+                method: "POST",
+                headers: {
+                    'x-access-token': token,
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                if (result.res_data && result.res_data.application_id) {
+                    localStorage.setItem("application_id", result.res_data.application_id);
+                }
+                responseDiv.style.color = "green";
+                responseDiv.innerText = "Admission submitted successfully! Redirecting...";
+                setTimeout(() => {
+                    window.location.href = "/onboard";
+                }, 2500);
+            } else {
+                responseDiv.style.color = "red";
+                responseDiv.innerText = result.message || "Submission failed.";
+            }
+        } catch (error) {
+            responseDiv.style.color = "red";
+            responseDiv.innerText = "An error occurred: " + error.message;
+        }
+    });
+</script>
+
+</body>
+</html>

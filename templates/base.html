@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Store Module</title>
+    
+</head>
+<body>
+    <h1>Store Module</h1>
+    <nav>
+        <a href="/issue_item">Issue Item</a> |
+        <a href="/return_item">Return Item</a> |
+        <a href="/add_item">Add Item</a> |
+        <a href="/viewstock">View Stock</a> |
+        <a href="/issued_items">Issued Non-Consumables</a> |
+        <a href="/transactions">Transactions</a>
+
+
+    </nav>
+    <hr>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</body>
+</html>

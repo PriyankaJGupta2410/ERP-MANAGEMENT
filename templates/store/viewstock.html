@@ -1,0 +1,100 @@
+<!-- viewstock.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Current Stock</h2>
+
+<div id="stockContainer">
+    <div id="lowStockAlert"></div>
+    <table border="1" cellpadding="10" cellspacing="0" id="stockTable">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Unit</th>
+                <th>Min Alert Level</th>
+                <th>Price Per Unit</th>
+                <th>Total Value</th>
+                <th>Description</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="stockTableBody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+function loadStock() {
+    fetch('/get_stock', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            displayStock(result.res_data);
+        } else {
+            alert('Error loading stock: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+function displayStock(data) {
+    const alertDiv = document.getElementById('lowStockAlert');
+    const tableBody = document.getElementById('stockTableBody');
+    
+    // Display low stock alert
+    if (data.low_stock_items && data.low_stock_items.length > 0) {
+        let alertHtml = `
+            <div style="padding: 10px; background-color: #ffcdd2; color: #b71c1c; border: 1px solid #b71c1c; margin-bottom: 20px;">
+                <strong>⚠ Low Stock Alert:</strong>
+                <ul>
+        `;
+        data.low_stock_items.forEach(item => {
+            alertHtml += `<li>${item.name} is at ${item.quantity} ${item.unit} (Minimum Alert: ${item.min_stock_alert})</li>`;
+        });
+        alertHtml += '</ul></div>';
+        alertDiv.innerHTML = alertHtml;
+    } else {
+        alertDiv.innerHTML = '';
+    }
+    
+    // Display stock table
+    let tableHtml = '';
+    if (data.items && data.items.length > 0) {
+        data.items.forEach(item => {
+            const status = item.quantity <= item.min_stock_alert ? 
+                (item.quantity === 0 ? 'Out of Stock' : 'Low Stock') : 'In Stock';
+            const rowClass = item.quantity <= item.min_stock_alert ? 'low-stock-row' : '';
+            
+            tableHtml += `
+                <tr class="${rowClass}">
+                    <td>${item.name}</td>
+                    <td>${item.category_name || 'N/A'}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.unit}</td>
+                    <td>${item.min_stock_alert}</td>
+                    <td>${parseFloat(item.price).toFixed(2)}</td>
+                    <td>${parseFloat(item.total_price).toFixed(2)}</td>
+                    <td>${item.description || 'N/A'}</td>
+                    <td>${status}</td>
+                </tr>
+            `;
+        });
+    } else {
+        tableHtml = '<tr><td colspan="9">No items found</td></tr>';
+    }
+    
+    tableBody.innerHTML = tableHtml;
+}
+
+// Load stock on page load
+document.addEventListener('DOMContentLoaded', loadStock);
+</script>
+{% endblock %}

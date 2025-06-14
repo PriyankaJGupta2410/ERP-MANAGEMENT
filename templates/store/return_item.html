@@ -1,0 +1,64 @@
+<!-- return_item.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Return Item</h2>
+<form method="POST" id="returnForm">
+    <label>Item:</label>
+    <select name="item_id" required>
+        {% for item in items %}
+            <option value="{{ item.item_id }}">{{ item.name }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Returned By:</label>
+    <select name="returned_by" required>
+        {% for user in users %}
+            <option value="{{ user._id }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Quantity:</label>
+    <input type="number" name="quantity" min="1" required>
+    
+    <label>Return Date:</label>
+    <input type="date" name="return_date" required>
+    
+    <label>Remarks (Condition):</label>
+    <textarea name="remarks" placeholder="Item condition and other remarks"></textarea>
+    
+    <button type="submit">Return Item</button>
+</form>
+
+<script>
+document.getElementById('returnForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {};
+    
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    fetch('/return_item', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            alert('Item returned successfully!');
+            this.reset();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+});
+</script>
+{% endblock %}

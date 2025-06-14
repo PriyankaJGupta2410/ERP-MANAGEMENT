@@ -1,0 +1,63 @@
+<!-- dashboard.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Store Management Dashboard</h2>
+
+<div id="dashboardStats">
+    <div class="stat-card">
+        <h3>Total Items</h3>
+        <p id="totalItems">Loading...</p>
+    </div>
+    <div class="stat-card">
+        <h3>Low Stock Items</h3>
+        <p id="lowStockItems">Loading...</p>
+    </div>
+    <div class="stat-card">
+        <h3>Total Transactions</h3>
+        <p id="totalTransactions">Loading...</p>
+    </div>
+</div>
+
+<div id="quickActions">
+    <h3>Quick Actions</h3>
+    <button onclick="window.location.href='/add_item'">Add New Item</button>
+    <button onclick="window.location.href='/issue_item'">Issue Item</button>
+    <button onclick="window.location.href='/return_item'">Return Item</button>
+    <button onclick="window.location.href='/viewstock'">View Stock</button>
+    <button onclick="window.location.href='/transactions'">View Transactions</button>
+</div>
+
+<script>
+function loadDashboard() {
+    fetch('/dashboard', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            document.getElementById('totalItems').textContent = result.res_data.total_items;
+            document.getElementById('lowStockItems').textContent = result.res_data.low_stock_items;
+            document.getElementById('totalTransactions').textContent = result.res_data.total_transactions;
+            
+            // Highlight low stock if > 0
+            const lowStockElement = document.getElementById('lowStockItems');
+            if (result.res_data.low_stock_items > 0) {
+                lowStockElement.style.color = '#d32f2f';
+                lowStockElement.style.fontWeight = 'bold';
+            }
+        } else {
+            alert('Error loading dashboard: ' + result.message);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+    });
+}
+
+// Load dashboard on page load
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %>}
